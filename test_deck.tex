@@ -1,0 +1,226 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+
+%% Use the official HUST theme
+%% Options:
+%%   color       = blue | red
+%%   font        = lato | arial | times
+%%   titlefont   = same | avantgarde
+%%   footerlogo  = full | mark | wordmark | hust | none
+%%   bar         = thin | thick
+%%   titlepage   = cover | dark
+%%   sectionpage = none | panel
+%%   numbering   = none | plain | fraction
+%%   footer      = <custom footer text>
+%%   footerleft  = <custom left text>
+\usetheme[
+  color=blue,
+  font=cm,
+  titlefont=same,
+  footerlogo=mark,
+  bar=thin,
+  titlepage=cover,
+  sectionpage=panel,
+  numbering=fraction,
+  progressbar=on,
+  logo2image=fami-shield.png,
+  logo2vn={KHOA TOÁN - TIN},
+  logo2en={Faculty of Mathematics and Informatics},
+  logo2color=famiblue
+]{HUST}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage[backend=biber,style=numeric,sorting=none,maxcitenames=2,mincitenames=1]{biblatex}
+\addbibresource{refs.bib}
+
+\title{Xây dựng mẫu trình chiếu Beamer chuẩn nhận diện HUST}
+\subtitle{Hệ thống trình chiếu LaTeX hiện đại, linh hoạt tỉ lệ và kích thước phông chữ}
+\author{Nguyễn Văn A}
+\institute{Trường Công nghệ Thông tin và Truyền thông\\Đại học Bách khoa Hà Nội}
+\date{\today}
+
+\begin{document}
+
+%% ------------------------------------------------------------- 0a. Welcome Screen 1: Normal bg-dark
+\begin{hustwelcomeframe}
+\end{hustwelcomeframe}
+
+%% ------------------------------------------------------------- 0b. Welcome Screen 2: Modified bg-background showcase
+\begin{hustwelcomeframe}[bg=background, footer={DEMO SHOWCASE}]
+\end{hustwelcomeframe}
+
+%% ------------------------------------------------------------- 1. Title Slide (Image 1)
+\hustsetup{slogantext={DEMO PRESENTATION}}
+\begin{frame}[plain,noframenumbering]
+  \titlepage
+\end{frame}
+
+%% ------------------------------------------------------------- 2. Outline
+\begin{frame}{\husttoctitle}{\husttocsubtitle}
+  \tableofcontents[split=3,hideallsubsections]
+\end{frame}
+
+%% ------------------------------------------------------------- Section 1
+\section{Giới thiệu \& quy chuẩn}
+\subsection{Hệ thống nhận diện thương hiệu}
+\begin{frame}{Tạo cụm logo động theo sổ tay thương hiệu}{Quy chuẩn Hình 7 (Việt - Anh) và Hình 9 (Đơn vị thành viên)}
+  \scriptsize
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{1. Cụm chính thức Việt - Anh (Hình 7):}
+      \vskip0.3em
+      \hustlogo[height=0.85cm]
+      \vskip0.7em
+      \textbf{2. Bản 2 dòng Việt - Anh (Hình 7b):}
+      \vskip0.3em
+      \hustlogo[height=0.85cm, layout=2, vn={ĐẠI HỌC\newline BÁCH KHOA HÀ NỘI}, en={HANOI UNIVERSITY\newline OF SCIENCE AND TECHNOLOGY}]
+      \vskip0.7em
+      \textbf{3. Đơn vị thành viên 1 dòng (Hình 9):}
+      \vskip0.3em
+      \hustlogo[height=0.85cm, unit={TRƯỜNG CƠ KHÍ}]
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+      \textbf{4a. Đơn vị 2 dòng -- ĐHBKHN 2 dòng (Đối xứng):}
+      \vskip0.3em
+      \hustlogo[height=0.85cm, layout=4a, unit={VIỆN CÔNG NGHỆ ĐIỀU KHIỂN\newline VÀ TỰ ĐỘNG HÓA}]
+      \vskip0.7em
+      \textbf{4b. Đơn vị 2 dòng -- ĐHBKHN 1 dòng (Căn giữa):}
+      \vskip0.3em
+      \hustlogo[height=0.85cm, layout=4b, unit={VIỆN CÔNG NGHỆ ĐIỀU KHIỂN\newline VÀ TỰ ĐỘNG HÓA}]
+      \vskip0.7em
+      \textbf{5. Cụm logo Khoa Toán - Tin (FaMI, Hình 3):}
+      \vskip0.3em
+      \hustlogo[image=fami-shield.png, height=0.85cm, vn={KHOA TOÁN - TIN}, en={Faculty of Mathematics and Informatics}, color=famiblue, equalwidth=false]
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Quy định màu sắc và phông chữ}
+
+\begin{frame}{Hệ thống nhận diện thương hiệu ĐHBK Hà Nội}{Tuân thủ Sổ tay nhận diện thương hiệu và mẫu PowerPoint 2026}
+  \begin{itemize}
+    \item \textbf{Màu sắc quy chuẩn}:
+      \begin{itemize}
+        \item Hệ màu thứ cấp: Xanh lam đậm (\texttt{\#003366}), Đỏ (\texttt{\#C02034}).
+        \item Hệ màu chính: Đỏ cờ (\texttt{\#CE1628}), Vàng sao (\texttt{\#F3C108}), Đen (\texttt{\#231F20}).
+      \end{itemize}
+    \item \textbf{Kiểu chữ quy định}:
+      \begin{itemize}
+        \item Phông chữ chính (tiêu đề): \textbf{Avant Garde} (TeX Gyre Adventor).
+        \item Phông chữ phụ (nội dung): \textbf{Lato}.
+        \item Phông chữ văn bản: \textbf{Times New Roman}.
+      \end{itemize}
+    \item \textbf{Tỉ lệ khung hình linh hoạt}: Hỗ trợ tự nhiên 16:9, 4:3, 16:10, 5:4 qua tùy chọn lớp \texttt{aspectratio}.
+  \end{itemize}
+\end{frame}
+
+%% ------------------------------------------------------------- Section 2
+\section{Các khối nội dung \& toán học}
+\subsection{Các loại khối hiển thị}
+
+\begin{frame}{Các loại khối hiển thị (Beamer blocks)}{Đồng bộ màu sắc nhận diện thương hiệu}
+  \begin{block}{Khối tiêu chuẩn (hustmain)}
+    Khối định nghĩa hoặc thông tin quan trọng được làm nổi bật với màu xanh nhận diện của trường.
+  \end{block}
+
+  \begin{alertblock}{Khối cảnh báo (hustalert)}
+    Khối cảnh báo hoặc kết luận then chốt sử dụng màu đỏ thương hiệu HUST.
+  \end{alertblock}
+
+  \begin{exampleblock}{Khối ví dụ (hustorange)}
+    Ví dụ minh họa, mã nguồn hoặc kết quả thực nghiệm với màu cam nhận diện HUST.
+  \end{exampleblock}
+\end{frame}
+
+\subsection{Công thức toán học \& bảng số liệu}
+\begin{frame}{Công thức toán học \& bảng dữ liệu}{Hiển thị sắc nét ở mọi độ phân giải}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{Mô hình tối ưu hóa}:
+      \begin{equation}
+        \min_{\mathbf{w}} \frac{1}{2}\|\mathbf{w}\|^2 + C \sum_{i=1}^N \xi_i
+      \end{equation}
+      thỏa mãn điều kiện:
+      \begin{equation}
+        y_i (\mathbf{w}^T \mathbf{x}_i + b) \ge 1 - \xi_i, \quad \xi_i \ge 0
+      \end{equation}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+      \textbf{Kết quả thực nghiệm}:
+      \begin{table}
+        \centering
+        \small
+        \begin{tabular}{lrr}
+          \toprule
+          \textbf{Mô hình} & \textbf{Độ chính xác} & \textbf{F1-Score} \\
+          \midrule
+          Baseline       & 87.5\% & 0.86 \\
+          CNN            & 93.2\% & 0.92 \\
+          Transformer    & \textbf{96.8\%} & \textbf{0.96} \\
+          \bottomrule
+        \end{tabular}
+      \end{table}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+%% ------------------------------------------------------------- Section 3: Biber / BibLaTeX Citations
+\section{Trích dẫn \& tài liệu tham khảo}
+\subsection{Phương pháp tối ưu hóa đa mục tiêu}
+
+\begin{frame}{Nghiên cứu tối ưu hóa đa mục tiêu}{Trích dẫn 1 dòng: thanh footer giữ nguyên vị trí phân tách tinh tế}
+  Nghiên cứu về phương pháp tối ưu hóa đa mục tiêu được đề xuất bởi Bello-Cruz và cộng sự\cite{bellocruz2025} để giải Bài toán (4).
+
+  \begin{itemize}
+    \item Nếu $C$ là một tập compact, theo Định lý 6\cite{bellocruz2025}, dãy $\{x_k\}$ sinh ra bởi thuật toán MPG-E hội tụ về một nghiệm Pareto yếu của bài toán (4).
+    \item Cụm trích dẫn tự động căn lề tránh logo chân trang (\texttt{footerlogo=mark}), thanh viền footer tự động điều chỉnh linh hoạt.
+    \item Trích dẫn lặp lại cùng tài liệu trên cùng slide sẽ tái sử dụng chỉ số mà không bị trùng lặp ở chân trang.
+  \end{itemize}
+\end{frame}
+
+\subsection{Thuật toán quán tính trong không gian Hilbert}
+\begin{frame}{Nhiều trích dẫn trên cùng một slide}{Thanh footer tự động đẩy lên 3 dòng để chứa trích dẫn}
+  Các thuật toán giải bài toán tối ưu và ứng dụng trong khoa học kỹ thuật:
+  \begin{itemize}
+    \item Phương pháp gradient gần kề với tìm kiếm đường thẳng rõ ràng\cite{bellocruz2025}.
+    \item Thuật toán quán tính cho bài toán tối ưu lồi trong không gian Hilbert\cite{alvarez2024}.
+    \item Xuất bản khoa học và chuẩn nhận diện thương hiệu đại học\cite{hust2026}.
+  \end{itemize}
+\end{frame}
+
+%% ------------------------------------------------------------- Section 4 (Tắt panel slide để minh họa tùy chọn)
+\hustsection[panel=false]{Tùy biến \& linh hoạt}
+
+\begin{frame}{Các tùy chọn của gói theme}{Tùy biến dễ dàng qua \texttt{\textbackslash usetheme} hoặc \texttt{\textbackslash hustsetup}}
+  \begin{description}
+    \item[\texttt{color}] \texttt{blue} (mặc định) hoặc \texttt{red}.
+    \item[\texttt{font}] \texttt{lato} (mặc định), \texttt{arial}, \texttt{times}, hoặc \texttt{cm}.
+    \item[\texttt{titlefont}] \texttt{same} hoặc \texttt{avantgarde}.
+    \item[\texttt{slogan}] \texttt{on} (mặc định, hiển thị ONE LOVE. ONE FUTURE.) hoặc \texttt{off}.
+    \item[\texttt{wordmark}] \texttt{on} (mặc định) hoặc \texttt{off} (bật/tắt cụm chữ HUST trung tâm).
+    \item[\texttt{panelsocial}] \texttt{on} (mặc định) hoặc \texttt{off} (ẩn web/facebook trên panel).
+    \item[\texttt{unit}] Tên trường/viện thành viên (ví dụ \texttt{unit=\{TRƯỜNG CƠ KHÍ\}}).
+    \item[\texttt{footerlogo}] \texttt{full}, \texttt{mark}, \texttt{wordmark}, \texttt{hust}, hoặc \texttt{none}.
+    \item[\texttt{numbering}] \texttt{plain}, \texttt{fraction}, hoặc \texttt{none}.
+  \end{description}
+\end{frame}
+
+%% ------------------------------------------------------------- 5. References Frames (Manual Split with Identical Title)
+\begin{hustreferencesframe}[from=1, to=2]
+\end{hustreferencesframe}
+
+\begin{hustreferencesframe}[from=3, to=3]
+\end{hustreferencesframe}
+
+%% ------------------------------------------------------------- Ending Dark Slide
+\begin{hustdarkframe}
+  \centering
+  \vspace*{0.2\paperheight}
+  {\Huge\bfseries\color{white} CẢM ƠN QUÝ THẦY CÔ\\VÀ CÁC BẠN ĐÃ LẮNG NGHE!\par}
+  \vspace{1.5em}
+  {\large\color{white!85} Q \& A\par}
+\end{hustdarkframe}
+
+\end{document}
