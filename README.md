@@ -1,4 +1,4 @@
-# HUST Beamer Theme (Đại Học Bách Khoa Hà Nội)
+# HUST Beamer Theme (Đại học Bách khoa Hà Nội)
 
 Bộ giao diện trình chiếu **LaTeX Beamer** chuẩn hóa theo **Sổ tay nhận diện thương hiệu Đại học Bách khoa Hà Nội** và bộ mẫu bài giảng điện tử PowerPoint 2026 chính thức.
 
