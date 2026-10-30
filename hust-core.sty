@@ -232,8 +232,91 @@
 \newcommand{\husttruncate}[2]{%
   \directlua{hust_utf8_truncate("\luaescapestring{\unexpanded{#2}}", \number\numexpr#1\relax)}%
 }
+
+%% Width-based string truncation (binary search with font measurement in TeX/Lua)
+\newbox\hust@tbox
+\newdimen\hust@tmax
+\newcount\hust@tlow
+\newcount\hust@thigh
+\newcount\hust@tmid
+\def\hust@tbest{...}
+
+\directlua{
+  hust_t_str = ""
+  function hust_t_set(s)
+    hust_t_str = s
+    return unicode.utf8.len(s)
+  end
+  function hust_t_sub(k)
+    local sub = unicode.utf8.sub(hust_t_str, 1, k)
+    while string.sub(sub, -1) == " " do
+      sub = string.sub(sub, 1, -2)
+    end
+    local bs = string.match(sub, "\\+$")
+    if bs and math.fmod(string.len(bs), 2) == 1 then
+      sub = string.sub(sub, 1, -2)
+    end
+    local dl = string.char(36)
+    local lb = string.char(123)
+    local rb = string.char(125)
+    local open_b = 0
+    local open_m = false
+    for i = 1, string.len(sub) do
+      local c = string.sub(sub, i, i)
+      if c == dl then open_m = not open_m
+      elseif c == lb then open_b = open_b + 1
+      elseif c == rb and open_b > 0 then open_b = open_b - 1 end
+    end
+    if open_m then sub = sub .. dl end
+    if open_b > 0 then sub = sub .. string.rep(rb, open_b) end
+    tex.sprint(sub .. "...")
+  end
+}
+
+\newcommand{\husttruncateto}[3]{%
+  \begingroup
+    #2\relax
+    \protected@edef\hust@t@str{#3}%
+    \setbox\hust@tbox=\hbox{\hust@t@str}%
+    \ifdim\wd\hust@tbox>#1\relax
+      \hust@tmax=#1\relax
+      \hust@thigh=\directlua{tex.sprint(hust_t_set("\luaescapestring{\hust@t@str}"))}\relax
+      \hust@tlow=1\relax
+      \def\hust@tbest{...}%
+      \hust@tloop{#2}%
+      \hust@tbest
+    \else
+      \hust@t@str
+    \fi
+  \endgroup
+}
+
+\def\hust@tloop#1{%
+  \ifnum\hust@tlow>\hust@thigh\else
+    \hust@tmid=\numexpr(\hust@tlow + \hust@thigh) / 2\relax
+    \begingroup
+      #1\relax
+      \setbox\hust@tbox=\hbox{\directlua{hust_t_sub(\the\hust@tmid)}}%
+      \ifdim\wd\hust@tbox>\hust@tmax\relax
+        \global\hust@thigh=\numexpr\hust@tmid - 1\relax
+      \else
+        \global\let\hust@tmpbest\relax
+        \xdef\hust@tmpbest{\directlua{hust_t_sub(\the\hust@tmid)}}%
+        \global\hust@tlow=\numexpr\hust@tmid + 1\relax
+      \fi
+    \endgroup
+    \ifx\hust@tmpbest\relax\else
+      \let\hust@tbest\hust@tmpbest
+      \global\let\hust@tmpbest\relax
+    \fi
+    \hust@tloop{#1}%
+  \fi
+}
+\let\husttruncatetowidth\husttruncateto
 \else
 \newcommand{\husttruncate}[2]{#2}
+\newcommand{\husttruncateto}[3]{#3}
+\let\husttruncatetowidth\husttruncateto
 \fi
 
 \pgfkeys{/hust/.cd,

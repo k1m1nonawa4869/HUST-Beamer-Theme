@@ -26,12 +26,12 @@
       \def\beamer@partpages##1##2{}%
       \def\beamer@documentpages##1{}%
       \def\sectionentry##1##2##3##4##5{%
-        \global\expandafter\def\csname hust@nav@sectitle@##1\endcsname{##2}%
-        \def\hust@tmp@short{##4}%
+        \global\expandafter\def\csname hust@nav@sectitle@##1\endcsname{##4}%
+        \def\hust@tmp@short{##2}%
         \ifx\hust@tmp@short\@empty
-          \global\expandafter\def\csname hust@nav@secshort@##1\endcsname{##2}%
-        \else
           \global\expandafter\def\csname hust@nav@secshort@##1\endcsname{##4}%
+        \else
+          \global\expandafter\def\csname hust@nav@secshort@##1\endcsname{##2}%
         \fi
         \global\expandafter\def\csname hust@nav@secpage@##1\endcsname{##3}%
         \ifcsname hust@nav@subcount@##1\endcsname\else
@@ -157,9 +157,9 @@
       \node[anchor=center, inner sep=0pt, outer sep=0pt, align=center, text width=\dimexpr\hust@sec@w - 4pt\relax]
         at ([xshift=\hust@sec@xm, yshift=\hust@prog@texty] current page.north west) {%
           \ifx\hust@cur@spage\@empty
-            {\fontsize{6pt}{6.8pt}\linespread{0.82}\selectfont\bfseries\color{white}\hust@cur@stitle}%
+            {\fontsize{6pt}{6.8pt}\linespread{0.82}\selectfont\bfseries\color{white}\husttruncateto{\dimexpr\hust@sec@w - 4.5pt\relax}{\fontsize{6pt}{6.8pt}\selectfont\bfseries}{\hust@cur@stitle}}%
           \else
-            \hyperlink{Navigation\hust@cur@spage}{{\fontsize{6pt}{6.8pt}\linespread{0.82}\selectfont\bfseries\color{white}\hust@cur@stitle}}%
+            \hyperlink{Navigation\hust@cur@spage}{{\fontsize{6pt}{6.8pt}\linespread{0.82}\selectfont\bfseries\color{white}\husttruncateto{\dimexpr\hust@sec@w - 4.5pt\relax}{\fontsize{6pt}{6.8pt}\selectfont\bfseries}{\hust@cur@stitle}}}%
           \fi
         };
       \ifnum\hust@sub@total>0\relax
@@ -183,9 +183,9 @@
       \node[anchor=center, inner sep=0pt, outer sep=0pt, align=center, text width=\dimexpr\hust@sec@w - 4pt\relax]
         at ([xshift=\hust@sec@xm, yshift=\hust@prog@texty] current page.north west) {%
           \ifx\hust@cur@spage\@empty
-            {\fontsize{6pt}{6.8pt}\linespread{0.82}\selectfont\bfseries\color{hustblack}\hust@cur@stitle}%
+            {\fontsize{6pt}{6.8pt}\linespread{0.82}\selectfont\bfseries\color{hustblack}\husttruncateto{\dimexpr\hust@sec@w - 4.5pt\relax}{\fontsize{6pt}{6.8pt}\selectfont\bfseries}{\hust@cur@stitle}}%
           \else
-            \hyperlink{Navigation\hust@cur@spage}{{\fontsize{6pt}{6.8pt}\linespread{0.82}\selectfont\bfseries\color{hustblack}\hust@cur@stitle}}%
+            \hyperlink{Navigation\hust@cur@spage}{{\fontsize{6pt}{6.8pt}\linespread{0.82}\selectfont\bfseries\color{hustblack}\husttruncateto{\dimexpr\hust@sec@w - 4.5pt\relax}{\fontsize{6pt}{6.8pt}\selectfont\bfseries}{\hust@cur@stitle}}}%
           \fi
         };
       \ifnum\hust@sub@total>0\relax
@@ -372,12 +372,12 @@
       %% THICK BAR MODE: Subtitle moves into the thick accent bar with white text
       \node[anchor=west, inner sep=0pt, outer sep=0pt]
         at ([xshift=\hust@fW{mL}, yshift=\dimexpr -\hust@cur@progh - \hust@fH{bandB}/2\relax] current page.north west) {%
-          \parbox{\hust@title@avail@w}{\usebeamerfont{frametitle}\color{white}\raggedright\strut\insertframetitle\strut}%
+          \parbox{\hust@title@avail@w}{\usebeamerfont{frametitle}\color{white}\raggedright\strut\husttruncateto{\hust@title@avail@w}{\usebeamerfont{frametitle}}{\insertframetitle}\strut}%
         };
       \ifnum\hust@hassub=1\relax
         \node[anchor=west, inner sep=0pt, outer sep=0pt]
           at ([xshift=\hust@fW{mL}, yshift=\dimexpr -\hust@cur@progh - (\hust@fH{bandB} + \hust@fH{thickB})/2\relax] current page.north west) {%
-            \parbox{\dimexpr\paperwidth - 2\hust@fW{mL}\relax}{\usebeamerfont{framesubtitle}\color{HUSTWhite}\spaceskip=0.8\fontdimen2\font\raggedright\strut\insertframesubtitle\strut}%
+            \parbox{\dimexpr\paperwidth - 2\hust@fW{mL}\relax}{\usebeamerfont{framesubtitle}\color{HUSTWhite}\spaceskip=0.8\fontdimen2\font\raggedright\strut\husttruncateto{\dimexpr\paperwidth - 2\hust@fW{mL}\relax}{\usebeamerfont{framesubtitle}}{\insertframesubtitle}\strut}%
           };
       \fi
     \else
@@ -386,16 +386,16 @@
         %% Single-line title: mathematically centered in the colored header band
         \node[anchor=west, inner sep=0pt, outer sep=0pt]
           at ([xshift=\hust@fW{mL}, yshift=\dimexpr -\hust@cur@progh - \hust@fH{bandThinB}/2\relax] current page.north west) {%
-            \parbox{\hust@title@avail@w}{\usebeamerfont{frametitle}\color{white}\raggedright\strut\insertframetitle\strut}%
+            \parbox{\hust@title@avail@w}{\usebeamerfont{frametitle}\color{white}\raggedright\strut\husttruncateto{\hust@title@avail@w}{\usebeamerfont{frametitle}}{\insertframetitle}\strut}%
           };
       \else
         %% Title + Subtitle: vertically centered as a 2-line block inside the colored header band
         \node[anchor=west, inner sep=0pt, outer sep=0pt]
           at ([xshift=\hust@fW{mL}, yshift=\dimexpr -\hust@cur@progh - \hust@fH{bandThinB}/2\relax] current page.north west) {%
             \parbox{\hust@title@avail@w}{%
-              {\usebeamerfont{frametitle}\color{white}\raggedright\strut\insertframetitle\strut\par}%
+              {\usebeamerfont{frametitle}\color{white}\raggedright\strut\husttruncateto{\hust@title@avail@w}{\usebeamerfont{frametitle}}{\insertframetitle}\strut\par}%
               \nointerlineskip\vskip 1.5pt%
-              {\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\spaceskip=0.8\fontdimen2\font\raggedright\strut\insertframesubtitle\strut\par}%
+              {\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\spaceskip=0.8\fontdimen2\font\raggedright\strut\husttruncateto{\hust@title@avail@w}{\usebeamerfont{framesubtitle}}{\insertframesubtitle}\strut\par}%
             }%
           };
       \fi

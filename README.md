@@ -529,6 +529,23 @@ Khi bật `sectionpage=panel`, mỗi khi bắt đầu một `\section`, theme t�
 
 Khi bật `progressbar=on` trong `\usetheme` hoặc `\hustsetup{progressbar=on}`:
 - **Bố cục các ô chữ nhật**: Toàn bộ chiều rộng màn hình được chia thành các ô chữ nhật đều nhau tương ứng với số lượng `\section` trong bài trình chiếu.
+- **Tên rút gọn / Alias cho Section trên Thanh Tiến Trình (`\section[alias]{full}`)**:
+  - Khi bài trình chiếu có nhiều section hoặc tên section dài, các ô trên thanh tiến trình có chiều rộng thu hẹp lại.
+  - Tương tự như cơ chế `\author[tên ngắn]{tên đầy đủ}` (dùng tên ngắn ở chân trang và tên đầy đủ ở trang bìa), người dùng có thể truyền tên rút gọn (alias) qua đối số tùy chọn `[...]`:
+    ```latex
+    \section[Quy chuẩn]{Giới thiệu \& quy chuẩn}
+    \section[Giải thuật]{Các khối nội dung \& giải thuật}
+    ```
+    - **Mặc định**: Nếu không truyền `[...]` (ví dụ `\section{Nội dung chính}`), thanh tiến trình sẽ in toàn bộ tên section đầy đủ.
+    - **Khi truyền `[...]`**: Tên alias trong `[...]` sẽ được in trên thanh tiến trình, trong khi trang chuyển mục (`section panel`) và mục lục (`\tableofcontents`) vẫn hiển thị đầy đủ tên dài nguyên bản.
+  - **Hỗ trợ cú pháp `\hustsection[alias=...]` (hoặc `short=...`)**: Người dùng cũng có thể thiết lập alias qua key-value ngay trước `\section`:
+    ```latex
+    \hustsection[panel=false, alias=Tùy biến]
+    \section{Tùy biến \& linh hoạt}
+    ```
+- **Tự động cắt ngắn bằng dấu ba chấm (`...`) theo độ rộng ô (Width-based Auto-truncation)**:
+  - Nếu tên section hoặc alias dài hơn chiều rộng của ô chữ nhật trừ đi khoảng đệm an toàn hai bên (`\hust@sec@w - 4.5pt`), theme tự động đo đạc độ rộng phông chữ thực tế và cắt ngắn bằng dấu ba chấm `...` (ví dụ: `Trích dẫn tài liệu tham khảo khoa học...`).
+  - Bảo đảm chữ trong ô thanh tiến trình **luôn nằm trên đúng 1 dòng duy nhất**, tuyệt đối không bị ngắt dòng làm tràn chiều cao thanh tiến trình hay đè lên các vạch tiến trình subsection bên dưới.
 - **Màu sắc phần hiện tại**: Section đang trình chiếu có nền màu chủ đạo của slide (`hustmain`: xanh hoặc đỏ) và chữ trắng; các section khác có nền sáng với chữ màu `HUSTBlack`.
 - **Vạch phân cách**: Giữa các ô chữ nhật có đường viền đứng mảnh tinh tế (`line width=0.4pt`).
 - **Đếm đề mục con (Subsection bars)**:
@@ -557,6 +574,10 @@ Khi bật `progressbar=on` trong `\usetheme` hoặc `\hustsetup{progressbar=on}`
 - **Tự động đẩy dải tiêu đề xuống (Push-down)**: Khi bật `progressbar=on`, toàn bộ dải header band, vạch màu phụ, frametitle, framesubtitle và thân nội dung slide tự động dịch xuống một khoảng bằng chiều cao thanh tiến trình (`\hust@prog@h`), bảo đảm không bị đè chữ hay tràn lề.
 
 ### 6.12. Căn Chỉnh Tiêu Đề Và Phụ Đề Slide (Frametitle & Subtitle) & Thanh Header Dày (`bar=thick`)
+
+- **Tự động cắt ngắn tiêu đề slide (`.title bar`) bằng dấu ba chấm (`...`) khi vượt quá khung viền**:
+  - Khi tiêu đề slide (`\insertframetitle`) quá dài so với chiều rộng khả dụng của dải màu tiêu đề (`\hust@title@avail@w`, đã trừ khoảng đệm lề trái và hộp số trang/logo góc phải nếu có), theme sẽ tự động đo lường kích thước phông thực tế và cắt ngắn bằng dấu `...` (ví dụ: `Biểu diễn giải thuật tối ưu hóa đa mục tiêu với algorithm2e, listings và minted trong...`).
+  - Giúp dải tiêu đề luôn duy trì bố cục chuẩn 1 dòng, không bị tràn ra ngoài khung chữ nhật hay va chạm với logo/số trang ở góc phải.
 
 - **In đậm đồng bộ (Bold Typography)**: Cả `frametitle` và `framesubtitle` đều được thiết lập in đậm (`\bfseries`) bằng phông tiêu đề đồng bộ, giúp nâng cao độ sắc nét và khả năng nhận diện khi trình chiếu từ xa.
 - **Tự động co hẹp khoảng cách từ (Word-spacing Optimization)**: Phụ đề `framesubtitle` được tinh chỉnh khoảng cách từ tự động (`\spaceskip=0.8\fontdimen2\font`), khắc phục hoàn toàn hiện tượng giãn từ quá rộng của một số phông chữ không chân.

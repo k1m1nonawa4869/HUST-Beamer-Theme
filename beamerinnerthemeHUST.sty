@@ -329,6 +329,7 @@
 
 \newif\ifhust@sec@panel@explicit
 \hust@sec@panel@explicitfalse
+\gdef\hust@pending@secalias{}
 
 \pgfkeys{/hustsection/.cd,
   panel/.is choice,
@@ -341,6 +342,8 @@
   on/.code={\global\hust@sec@showpaneltrue\global\hust@sec@panel@explicittrue},
   off/.code={\global\hust@sec@showpanelfalse\global\hust@sec@panel@explicittrue},
   none/.code={\global\hust@sec@showpanelfalse\global\hust@sec@panel@explicittrue},
+  alias/.code={\gdef\hust@pending@secalias{#1}},
+  short/.code={\gdef\hust@pending@secalias{#1}},
   .unknown/.code={},
 }
 
@@ -352,6 +355,33 @@
 \newcommand{\hustpanel}[1][true]{%
   \pgfkeys{/hustsection/.cd, panel=#1}%
   \@ifnextchar\bgroup{\@gobble}{}%
+}
+
+%% Hook \section to support \hustsection[alias=...] seamlessly when \section{...} has no []
+\let\hust@orig@section\section
+\def\section{%
+  \@ifstar{%
+    \hust@orig@section*%
+  }{%
+    \ifx\hust@pending@secalias\@empty
+      \expandafter\hust@orig@section
+    \else
+      \expandafter\hust@section@with@pending
+    \fi
+  }%
+}
+\def\hust@section@with@pending{%
+  \@ifnextchar[%
+    {\hust@section@with@pending@opt}%
+    {%
+      \edef\hust@tmp@alias{\hust@pending@secalias}%
+      \gdef\hust@pending@secalias{}%
+      \expandafter\hust@orig@section\expandafter[\hust@tmp@alias]%
+    }%
+}
+\def\hust@section@with@pending@opt[#1]{%
+  \gdef\hust@pending@secalias{}%
+  \hust@orig@section[#1]%
 }
 
 \AtBeginSection[]{%
