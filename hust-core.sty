@@ -57,8 +57,52 @@
 \colorlet{HUSTAmber}{hustamber}
 \definecolor{titlepagecolor}{cmyk}{1,.60,0,.40}
 
-%% ------------------------------------------------------------------ assets
+%% ------------------------------------------------------------------ assets & XObject cache
 \graphicspath{{assets/}{./assets/}{hust-beamer/assets/}{./hust-beamer/assets/}}
+
+%% Cache repeated images as PDF Form XObjects (LuaTeX) or global saveboxes (XeTeX)
+\newsavebox\hust@xtmp
+\newcommand{\hust@use@cachedimg}[3]{%
+  \ifdefined\saveboxresource
+    \ifcsname hust@xobj@#1\endcsname\else
+      \setbox\hust@xtmp=\hbox{\includegraphics[#2]{#3}}%
+      \saveboxresource\hust@xtmp\relax
+      \expandafter\xdef\csname hust@xobj@#1\endcsname{\the\lastsavedboxresourceindex}%
+    \fi
+    \useboxresource\csname hust@xobj@#1\endcsname\relax
+  \else
+    \ifcsname hust@imgbox@#1\endcsname\else
+      \expandafter\newsavebox\csname hust@imgbox@#1\endcsname
+      \global\expandafter\setbox\csname hust@imgbox@#1\endcsname=\hbox{\includegraphics[#2]{#3}}%
+    \fi
+    \expandafter\copy\csname hust@imgbox@#1\endcsname
+  \fi
+}
+\newcommand{\hust@use@cachedopacityimg}[4]{%
+  \ifdefined\saveboxresource
+    \ifcsname hust@xobj@#1\endcsname\else
+      \setbox\hust@xtmp=\hbox{\tikz[baseline=(husti.south)]\node[inner sep=0pt,outer sep=0pt,opacity=#2](husti){\includegraphics[#3]{#4}};}%
+      \saveboxresource\hust@xtmp\relax
+      \expandafter\xdef\csname hust@xobj@#1\endcsname{\the\lastsavedboxresourceindex}%
+    \fi
+    \useboxresource\csname hust@xobj@#1\endcsname\relax
+  \else
+    \ifcsname hust@imgbox@#1\endcsname\else
+      \expandafter\newsavebox\csname hust@imgbox@#1\endcsname
+      \global\expandafter\setbox\csname hust@imgbox@#1\endcsname=\hbox{\tikz[baseline=(husti.south)]\node[inner sep=0pt,outer sep=0pt,opacity=#2](husti){\includegraphics[#3]{#4}};}%
+    \fi
+    \expandafter\copy\csname hust@imgbox@#1\endcsname
+  \fi
+}
+
+%% Prevent hyperref PDF-string Unicode warnings on \\, \newline, \hustdate in \title/\author/\date
+\ifdefined\pdfstringdefDisableCommands
+  \pdfstringdefDisableCommands{%
+    \def\\{, }%
+    \def\newline{, }%
+    \def\hustdate#1#2#3#4{#2/#3/#4}%
+  }%
+\fi
 
 %% ------------------------------------------------------- ratio -> profile
 \newif\ifhust@wide
@@ -743,18 +787,19 @@
 %%   - Hình 7: Cụm logo chính thức Việt - Anh (Bilingual)
 %%   - Hình 9: Logo kết hợp đơn vị thành viên (Member institution / school / institute)
 \IfFontExistsTF{TeX Gyre Adventor}{%
-  \newfontfamily\hust@logofont{TeX Gyre Adventor}[Ligatures=TeX]
+  \newfontfamily\hust@brandfamily{TeX Gyre Adventor}[Ligatures=TeX]
 }{%
   \IfFontExistsTF{AvantGarde}{%
-    \newfontfamily\hust@logofont{AvantGarde}[Ligatures=TeX]
+    \newfontfamily\hust@brandfamily{AvantGarde}[Ligatures=TeX]
   }{%
     \IfFontExistsTF{Arial}{%
-      \newfontfamily\hust@logofont{Arial}[Ligatures=TeX]
+      \newfontfamily\hust@brandfamily{Arial}[Ligatures=TeX]
     }{%
-      \let\hust@logofont\sffamily
+      \let\hust@brandfamily\sffamily
     }%
   }%
 }
+\let\hust@logofont\hust@brandfamily
 
 \newdimen\hust@lh@dim
 \newdimen\hust@lgap@dim
@@ -764,6 +809,9 @@
 \newsavebox\hust@logobox
 \newsavebox\hust@topbox
 \newsavebox\hust@botbox
+\newsavebox\hust@tmpbox
+\newsavebox\hust@logo@lC
+\newsavebox\hust@logo@lD
 
 
 \def\hust@chknewline#1\newline#2\relax{%
@@ -897,9 +945,9 @@
       \fi
     \fi
   \fi
-  \begin{tikzpicture}[baseline={(shield.south)}]
-    \node[inner sep=0pt, outer sep=0pt, anchor=south west] (shield) at (0, 0)
-      {\includegraphics[height=\hust@lh@dim]{\hust@limg}};
+  \hbox{%
+    \hust@use@cachedimg{logo:\hust@limg:\the\hust@lh@dim}{height=\hust@lh@dim}{\hust@limg}%
+    \hskip\hust@lgap@dim%
     \if\relax\detokenize\expandafter{\hust@lunit}\relax
       %% ================================= Case 1 & 2: Bilingual (Hình 7)
       \def\hust@cmp@two{2}%
@@ -925,18 +973,21 @@
           \else
             \expandafter\hust@parse@two@en\hust@len\newline\newline\relax
           \fi
-          \node[anchor=base west, inner sep=0pt]
-            at ([xshift=\hust@lgap@dim, yshift=-0.2556\hust@lh@dim] shield.north east)
-            {\scalebox{0.92}[1]{{\normalfont\hust@logofont\fontsize{0.18\hust@lh@dim}{0.18\hust@lh@dim}\selectfont\bfseries\color{\hust@lcol}\hust@vn@A}}};
-          \node[anchor=base west, inner sep=0pt]
-            at ([xshift=\hust@lgap@dim, yshift=-0.5140\hust@lh@dim] shield.north east)
-            {\scalebox{0.92}[1]{{\normalfont\hust@logofont\fontsize{0.18\hust@lh@dim}{0.18\hust@lh@dim}\selectfont\bfseries\color{\hust@lcol}\hust@vn@B}}};
-          \node[anchor=base west, inner sep=0pt]
-            at ([xshift=\hust@lgap@dim, yshift=-0.7277\hust@lh@dim] shield.north east)
-            {{\normalfont\hust@logofont\fontsize{0.137\hust@lh@dim}{0.137\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@en@A}};
-          \node[anchor=base west, inner sep=0pt]
-            at ([xshift=\hust@lgap@dim, yshift=-0.9344\hust@lh@dim] shield.north east)
-            {{\normalfont\hust@logofont\fontsize{0.137\hust@lh@dim}{0.137\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@en@B}};
+          \sbox\hust@topbox{\scalebox{0.92}[1]{{\normalfont\hust@logofont\fontsize{0.18\hust@lh@dim}{0.18\hust@lh@dim}\selectfont\bfseries\color{\hust@lcol}\hust@vn@A}}}%
+          \sbox\hust@botbox{\scalebox{0.92}[1]{{\normalfont\hust@logofont\fontsize{0.18\hust@lh@dim}{0.18\hust@lh@dim}\selectfont\bfseries\color{\hust@lcol}\hust@vn@B}}}%
+          \sbox\hust@logo@lC{{\normalfont\hust@logofont\fontsize{0.137\hust@lh@dim}{0.137\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@en@A}}%
+          \sbox\hust@logo@lD{{\normalfont\hust@logofont\fontsize{0.137\hust@lh@dim}{0.137\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@en@B}}%
+          \hust@rule@w=\wd\hust@topbox\relax
+          \ifdim\wd\hust@botbox>\hust@rule@w \hust@rule@w=\wd\hust@botbox\relax\fi
+          \ifdim\wd\hust@logo@lC>\hust@rule@w \hust@rule@w=\wd\hust@logo@lC\relax\fi
+          \ifdim\wd\hust@logo@lD>\hust@rule@w \hust@rule@w=\wd\hust@logo@lD\relax\fi
+          \hbox to \hust@rule@w{%
+            \rlap{\raise\dimexpr 0.7444\hust@lh@dim\relax\copy\hust@topbox}%
+            \rlap{\raise\dimexpr 0.4860\hust@lh@dim\relax\copy\hust@botbox}%
+            \rlap{\raise\dimexpr 0.2723\hust@lh@dim\relax\copy\hust@logo@lC}%
+            \rlap{\raise\dimexpr 0.0656\hust@lh@dim\relax\copy\hust@logo@lD}%
+            \hfil
+          }%
         \endgroup
       \else
         %% Horizontal 1: 1 line VN, 1 line EN (Hình 7, matches footer-full.png)
@@ -948,53 +999,51 @@
         \ifx\hust@lequalwidth\hust@eqw@auto
           \ifx\hust@limg\hust@def@img\def\hust@do@eqw{1}\fi
         \fi
-        \node[inner sep=0pt, outer sep=0pt, anchor=west]
-          at ([xshift=\hust@lgap@dim] shield.east) {%
-            \vbox{%
-              \offinterlineskip%
-              \hbox{\usebox\hust@logobox}%
-              \vskip 0.08\hust@lh@dim%
-              \ifdefined\hust@do@eqw
-                \hbox{\resizebox{\wd\hust@logobox}{!}{{\normalfont\hust@logofont\fontsize{0.185\hust@lh@dim}{0.185\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@len}}}%
-              \else
-                \hbox{{\normalfont\hust@logofont\fontsize{0.155\hust@lh@dim}{0.155\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@len}}%
-              \fi
-            }%
-          };
+        \sbox\hust@tmpbox{%
+          \vbox{%
+            \offinterlineskip%
+            \hbox{\usebox\hust@logobox}%
+            \vskip 0.08\hust@lh@dim%
+            \ifdefined\hust@do@eqw
+              \hbox{\resizebox{\wd\hust@logobox}{!}{{\normalfont\hust@logofont\fontsize{0.185\hust@lh@dim}{0.185\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@len}}}%
+            \else
+              \hbox{{\normalfont\hust@logofont\fontsize{0.155\hust@lh@dim}{0.155\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@len}}%
+            \fi
+          }%
+        }%
+        \raise\dimexpr 0.5\hust@lh@dim - 0.5\ht\hust@tmpbox + 0.5\dp\hust@tmpbox\relax\hbox{\usebox\hust@tmpbox}%
       \fi
     \else
       %% ================================= Case 3 & 4: Member Unit (Hình 9)
       \ifdefined\hust@is@foura
         %% Case 4a: 2 lines VN + separator rule at center + 2 lines Unit (Symmetric)
-        \node[inner sep=0pt, outer sep=0pt, anchor=south west, align=left] (top)
-          at ([xshift=\hust@lgap@dim, yshift=0.04\hust@lh@dim] shield.east) {\usebox\hust@topbox};
-        \draw[\hust@llcol, line width=0.7pt]
-          ([xshift=\hust@lgap@dim] shield.east) -- ([xshift=\dimexpr\hust@lgap@dim + \hust@rule@w\relax] shield.east);
-        \node[inner sep=0pt, outer sep=0pt, anchor=north west, align=left] (bot)
-          at ([xshift=\hust@lgap@dim, yshift=-0.04\hust@lh@dim] shield.east) {\usebox\hust@botbox};
+        \hbox to \hust@rule@w{%
+          \rlap{\raise\dimexpr 0.54\hust@lh@dim + \dp\hust@topbox\relax\copy\hust@topbox}%
+          \rlap{\textcolor{\hust@llcol}{\raise\dimexpr 0.50\hust@lh@dim - 0.35pt\relax\hbox{\vrule width \hust@rule@w height 0.7pt depth 0pt}}}%
+          \rlap{\raise\dimexpr 0.46\hust@lh@dim - \ht\hust@botbox\relax\copy\hust@botbox}%
+          \hfil
+        }%
       \else
         \ifnum\hust@do@fourb=1
           %% Case 4b: 1 line VN + separator rule + 2 lines Unit (Cluster pushed up to center on shield)
-          \node[inner sep=0pt, outer sep=0pt, anchor=south west] (top)
-            at ([xshift=\hust@lgap@dim, yshift=0.16\hust@lh@dim] shield.east) {\usebox\hust@topbox};
-          \draw[\hust@llcol, line width=0.7pt]
-            ([xshift=\hust@lgap@dim, yshift=0.095\hust@lh@dim] shield.east) --
-            ([xshift=\dimexpr\hust@lgap@dim + \hust@rule@w\relax, yshift=0.095\hust@lh@dim] shield.east);
-          \node[inner sep=0pt, outer sep=0pt, anchor=north west, align=left] (bot)
-            at ([xshift=\hust@lgap@dim, yshift=0.035\hust@lh@dim] shield.east) {\usebox\hust@botbox};
+          \hbox to \hust@rule@w{%
+            \rlap{\raise\dimexpr 0.66\hust@lh@dim + \dp\hust@topbox\relax\copy\hust@topbox}%
+            \rlap{\textcolor{\hust@llcol}{\raise\dimexpr 0.595\hust@lh@dim - 0.35pt\relax\hbox{\vrule width \hust@rule@w height 0.7pt depth 0pt}}}%
+            \rlap{\raise\dimexpr 0.535\hust@lh@dim - \ht\hust@botbox\relax\copy\hust@botbox}%
+            \hfil
+          }%
         \else
           %% Case 3: 1 line VN + separator rule + 1 line Unit (Measured from official Hình 9a lockup)
-          \node[inner sep=0pt, outer sep=0pt, anchor=base west] (top)
-            at ([xshift=\hust@lgap@dim, yshift=0.167\hust@lh@dim] shield.east) {\usebox\hust@topbox};
-          \draw[\hust@llcol, line width=0.75pt]
-            ([xshift=\hust@lgap@dim, yshift=0.042\hust@lh@dim] shield.east) --
-            ([xshift=\dimexpr\hust@lgap@dim + \hust@rule@w\relax, yshift=0.042\hust@lh@dim] shield.east);
-          \node[inner sep=0pt, outer sep=0pt, anchor=base west] (bot)
-            at ([xshift=\hust@lgap@dim, yshift=-0.300\hust@lh@dim] shield.east) {\usebox\hust@botbox};
+          \hbox to \hust@rule@w{%
+            \rlap{\raise 0.667\hust@lh@dim\copy\hust@topbox}%
+            \rlap{\textcolor{\hust@llcol}{\raise\dimexpr 0.542\hust@lh@dim - 0.375pt\relax\hbox{\vrule width \hust@rule@w height 0.75pt depth 0pt}}}%
+            \rlap{\raise 0.200\hust@lh@dim\copy\hust@botbox}%
+            \hfil
+          }%
         \fi
       \fi
     \fi
-  \end{tikzpicture}%
+  }%
   \endgroup
 }
 
@@ -1023,7 +1072,7 @@
     #1%
   }%
   \hust@wm@h@dim=\hust@wm@h\relax
-  \sbox\hust@wm@imgbox{\includegraphics[height=\hust@wm@h@dim]{\hust@wm@img}}%
+  \sbox\hust@wm@imgbox{\hust@use@cachedimg{wm:\hust@wm@img:\the\hust@wm@h@dim}{height=\hust@wm@h@dim}{\hust@wm@img}}%
   \sbox\hust@wm@vnbox{{\hust@logofont\fontsize{0.25\hust@wm@h@dim}{0.25\hust@wm@h@dim}\selectfont\bfseries\color{\hust@wm@col}ĐẠI HỌC BÁCH KHOA HÀ NỘI}}%
   \sbox\hust@wm@enbox{{\hust@logofont\fontsize{0.14\hust@wm@h@dim}{0.14\hust@wm@h@dim}\selectfont\mdseries\color{\hust@wm@col}HANOI UNIVERSITY OF SCIENCE AND TECHNOLOGY}}%
   \vbox{%
