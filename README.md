@@ -17,8 +17,8 @@ Bộ giao diện trình chiếu **LaTeX Beamer** chuẩn hóa theo **Sổ tay nh
   - 🔴 [HUST Red PPT Template (Tỉ lệ 16:9)](references/%5BHUST%5D%20-%20RED%20PPT%20TEMPLATE%202026%20-%2016x9.pptx)
   - 🔴 [HUST Red PPT Template (Tỉ lệ 4:3)](references/%5BHUST%5D%20-%20RED%20PPT%20TEMPLATE%202026%20-%204x3.pptx)
 - **Bản xem trước sản phẩm (PDF Previews)**:
-  - 📊 [test_deck.pdf](test_deck.pdf): Bản trình chiếu hoàn chỉnh 16:9 tông màu Xanh lam (*Blue theme*, logo Khoa Toán - Tin FaMI, thanh mảnh, thanh tiến trình, thuật toán đa ngôn ngữ).
-  - 📊 [test_variants.pdf](test_variants.pdf): Bản trình chiếu hoàn chỉnh 4:3 tông màu Đỏ (*Red theme*, Viện CNTT&TT, số trang trên thanh tiêu đề, chân trang đa trích dẫn 2 cột).
+  - 📊 [test_deck.pdf](test_deck.pdf): Bản trình chiếu hoàn chỉnh 16:9 tông màu Xanh lam (*Blue theme*, tiếng Việt `lang=vi`, logo Khoa Toán - Tin FaMI, thanh mảnh, thanh tiến trình, thuật toán đa ngôn ngữ).
+  - 📊 [test_variants.pdf](test_variants.pdf): Bản trình chiếu hoàn chỉnh 4:3 tông màu Đỏ (*Red theme*, tiếng Anh `lang=en`, Viện CNTT&TT, số trang trên thanh tiêu đề, họa tiết chéo `framebg=on`, chân trang đa trích dẫn 2 cột).
 
 ---
 
@@ -51,12 +51,13 @@ HUST-Beamer-Theme/
 ├── beamerinnerthemeHUST.sty   # Subtheme thành phần bên trong (title page, panel, blocks, lists)
 ├── beamerouterthemeHUST.sty   # Subtheme khung ngoài (headline, frametitle, footer, dark frames)
 ├── hust-setup.tex             # Cấu hình mở rộng học thuật: bảng biểu, gói toán, mã code, danh sách
-├── assets/                    # Thư mục 28 tài nguyên đồ họa độ nét cao (PNG vector-rendered)
+├── assets/                    # Thư mục tài nguyên đồ họa tối ưu (lossless RGB PNG cho ảnh nền)
 ├── references/                # Sổ tay nhận diện thương hiệu & 4 file mẫu PowerPoint chính thức 2026
-├── test_deck.tex              # File mẫu trình chiếu 16:9 Blue hoàn chỉnh (font=lato, logo FaMI)
-├── test_deck.pdf              # Bản kết xuất PDF mẫu 16:9 Blue
-├── test_variants.tex          # File mẫu trình chiếu 4:3 Red hoàn chỉnh (font=cm, logo ĐHBK)
-├── test_variants.pdf          # Bản kết xuất PDF mẫu 4:3 Red
+├── .latexmkrc                 # Cấu hình biên dịch tự động LuaLaTeX + Biber (latexmk)
+├── test_deck.tex              # File mẫu trình chiếu 16:9 Blue tiếng Việt (lang=vi, font=lato, logo FaMI)
+├── test_deck.pdf              # Bản kết xuất PDF mẫu 16:9 Blue (tiếng Việt)
+├── test_variants.tex          # File mẫu trình chiếu 4:3 Red tiếng Anh (lang=en, font=cm, logo ĐHBK)
+├── test_variants.pdf          # Bản kết xuất PDF mẫu 4:3 Red (tiếng Anh)
 ├── refs.bib                   # File cơ sở dữ liệu thư mục trích dẫn (Biber / BibLaTeX)
 └── README.md                  # Tài liệu hướng dẫn sử dụng chi tiết
 ```
@@ -74,7 +75,7 @@ Theme khuyến nghị sử dụng **LuaLaTeX** (trình biên dịch hiện đạ
 3. Chọn thẻ **Build** (Biên dịch) ở cột bên trái:
    - Tại mục **Default Compiler** (Trình biên dịch mặc định), chọn **LuaLaTeX** (hoặc **XeLaTeX**).
    - Tại mục **Default Bibliography** (Trình xử lý tài liệu tham khảo), chọn **Biber**.
-4. Nếu có sử dụng gói tô màu mã nguồn **`minted`** (C++, Java, Rust...), cần cài đặt **Python** (`pip install pygments latexminted`) và thêm cờ **`-shell-escape`** vào lệnh biên dịch LuaLaTeX (trong thẻ **Commands** $\rightarrow$ **LuaLaTeX**: `lualatex.exe -synctex=1 -shell-escape -interaction=nonstopmode %.tex`).
+4. **Không cần Python / `-shell-escape` theo mặc định**: Gói `minted` hiện ở chế độ **chọn thêm (`off` mặc định)**, nên các bài trình chiếu thông thường (kể cả `listings`, `algorithm2e`, `tikz`) biên dịch trực tiếp bằng LuaLaTeX thuần hoặc `latexmk test_deck.tex` mà không cần Python. Nếu cần dùng `minted`, cài **Python** (`pip install pygments latexminted`), bật `\def\hustmintedmode{auto}` trước `\input{hust-setup}` và chạy lượt đầu với `-shell-escape` (các lượt sau tự động chuyển sang `frozencache` không cần `-shell-escape` hay Python!).
 5. Nhấn **OK** để lưu lại. Khi mở file `.tex`, nhấn **F5** (Build & View) để biên dịch toàn bộ quy trình `LuaLaTeX -> Biber -> LuaLaTeX`.
 
 ---
@@ -197,7 +198,9 @@ Tạo một file trình chiếu mới (ví dụ `presentation.tex`):
 | `logo2color` | Tên màu | `famiblue` | Mã màu nhận diện đơn vị thứ 2 (khóa cố định `famiblue` `#0062A5` cho Khoa Toán - Tin). |
 | `logo2layout` | `1`, `2` | `1` | Bố cục logo đơn vị thứ 2 trên trang bìa (chọn tùy chọn 1 dòng hoặc 2 dòng):<br>• `1`: Bố cục **1 dòng** (1 dòng tiếng Việt + 1 dòng tiếng Anh).<br>• `2`: Bố cục **2 dòng** (2 dòng tiếng Việt + 2 dòng tiếng Anh). |
 | `sectionpage` | `panel`, `none` | `none` | Tự động chèn trang chuyển mục (*section transition*) chia đôi với chữ HUST bên trái khi gặp lệnh `\section`. |
-| `sectionpanel` | `on`, `off`, `true`, `false` | `on` | Bật/tắt mặc định việc hiển thị slide chuyển mục khi `sectionpage=panel`. Có thể ghi đè trên từng mục bằng `\hustsection[panel=true\|false]` ngay trước `\section`. |
+| `sectionpanel` | `on`, `off`, `true`, `false` | `on` | Bật/tắt mặc định việc hiển thị slide chuyển mục khi `sectionpage=panel`. Có thể ghi đè trên từng mục bằng `\hustsection[panel=true\|false]` hoặc `\hustsection[panel=false, alias=Tên ngắn]{Tiêu đề dài}`. |
+| `lang` | `vi`, `en` | `vi` | Chuyển đổi ngôn ngữ tự động cho toàn bộ theme (`vi`: tiếng Việt — mặc định; `en`: tiếng Anh cho *Outline*, *References*, ngày tháng `\today`/`\hustdate`, `Hanoi`, tiêu đề khối định lý Beamer và `cleveref`). |
+| `fast` | `off`, `on` | `off` | Chế độ biên dịch nháp siêu tốc: bỏ qua các lớp nền bitmap/opacity nặng khi chỉnh sửa nội dung. |
 | `panelsocial` | `on`, `off`, `true`, `false` | `on` | Bật/tắt dải thông tin liên kết mạng xã hội (`hust.edu.vn`, `fb.com/dhbkhn`) ở góc trái dưới của trang chuyển mục (`panel`). |
 | `wordmark` | `on`, `off`, `true`, `false`, `none` | `on` | Bật/tắt hiển thị cụm chữ `HUST` trung tâm trên slide chào mừng (`hustwelcomeframe`). |
 | `slogan` | `on`, `off`, `true`, `false`, `none` | `on` | Bật/tắt hiển thị dòng khẩu hiệu (`ONE LOVE. ONE FUTURE.`) ở chân trang bìa và slide chào mừng. |
@@ -538,11 +541,7 @@ Khi bật `progressbar=on` trong `\usetheme` hoặc `\hustsetup{progressbar=on}`
     ```
     - **Mặc định**: Nếu không truyền `[...]` (ví dụ `\section{Nội dung chính}`), thanh tiến trình sẽ in toàn bộ tên section đầy đủ.
     - **Khi truyền `[...]`**: Tên alias trong `[...]` sẽ được in trên thanh tiến trình, trong khi trang chuyển mục (`section panel`) và mục lục (`\tableofcontents`) vẫn hiển thị đầy đủ tên dài nguyên bản.
-  - **Hỗ trợ cú pháp `\hustsection[alias=...]` (hoặc `short=...`)**: Người dùng cũng có thể thiết lập alias qua key-value ngay trước `\section`:
-    ```latex
-    \hustsection[panel=false, alias=Tùy biến]
-    \section{Tùy biến \& linh hoạt}
-    ```
+- **Hỗ trợ cú pháp `\hustsection[...]` viết liền hoặc viết tách**: Có thể viết tách trước `\section{...}` hoặc gộp trực tiếp `\hustsection[panel=false, alias=Tùy biến]{Tùy biến \& linh hoạt}` (khuyến nghị). Theme cũng cung cấp lệnh `\speakernote{...}` (bên cạnh `\note{từ khóa}{mô tả}` chân trang) để viết ghi chú diễn giả Beamer nguyên bản.
 - **Tự động cắt ngắn bằng dấu ba chấm (`...`) theo độ rộng ô (Width-based Auto-truncation)**:
   - Nếu tên section hoặc alias dài hơn chiều rộng của ô chữ nhật trừ đi khoảng đệm an toàn hai bên (`\hust@sec@w - 4.5pt`), theme tự động đo đạc độ rộng phông chữ thực tế và cắt ngắn bằng dấu ba chấm `...` (ví dụ: `Trích dẫn tài liệu tham khảo khoa học...`).
   - Bảo đảm chữ trong ô thanh tiến trình **luôn nằm trên đúng 1 dòng duy nhất**, tuyệt đối không bị ngắt dòng làm tràn chiều cao thanh tiến trình hay đè lên các vạch tiến trình subsection bên dưới.
@@ -736,10 +735,10 @@ Theme cung cấp giải pháp chú thích và tham chiếu chéo toàn diện, �
    - **Với `listings` (phong cách `hustcode`)**:
      - Tô màu cú pháp Python/C++/MATLAB với số dòng nằm gọn **bên trong** khung viền (`xleftmargin=1.6em, framexleftmargin=1.4em`).
      - **Nền mờ biến đổi theo theme (`hustcodebg = hustmain!5!white`)**: Trên bản Xanh sử dụng nền xanh phấn nhạt, trên bản Đỏ tự động chuyển sang nền ửng hồng phấn nhạt.
-   - **Với `minted` (tô màu cú pháp nâng cao qua Pygments)**:
-     - Tự động bọc trong hộp `hustmintedbox` đồng bộ màu nền `hustmain!5!white`, viền `hustmain!30` và giữ số thứ tự dòng nằm trọn bên trong khung viền.
-     - Hỗ trợ gán nhãn và tham chiếu chéo qua `\captionof{listing}{...}\label{lst:cpp}` và `\cref{lst:cpp}`.
-     - **Lưu ý cài đặt khi dùng `minted`**: Cần cài đặt **Python** (kèm gói `pygments` / `latexminted`) và bật cờ **`-shell-escape`** cho trình biên dịch (`lualatex -shell-escape`).
+   - **Với `minted` (tô màu cú pháp nâng cao qua Pygments, chế độ chọn thêm)**:
+     - Thiết kế đường kẻ ngang gọn gàng `frame=lines`, viền `hustmain!40`, giữ số thứ tự dòng nằm trọn bên trong khung.
+     - Hỗ trợ gán nhãn và tham chiếu chéo qua `\hustcaption[Listing][...]{...}\label{lst:cpp}` và `\cref{lst:cpp}`.
+     - **Chế độ kích hoạt linh hoạt (`\hustmintedmode`)**: Mặc định `off` (không nạp `minted`, không cần Python hay `-shell-escape`). Khai báo `\def\hustmintedmode{auto}` (hoặc `\def\hustuseminted{}`) trước `\input{hust-setup}` để tự động cache `_minted/` ở lượt đầu (`-shell-escape`) và tự chuyển sang `[frozencache]` ở mọi lượt sau theo từng `\jobname` (biên dịch không cần `-shell-escape`), hoặc dùng `frozen` / `live` trực tiếp. Có thể tắt thêm các gói phụ trợ qua `\def\hustnomathextra{}` và `\def\hustnocode{}`.
 
 ### 6.18. Module Cấu Hình Mở Rộng `hust-setup.tex`
 
@@ -827,7 +826,7 @@ Theme nạp sẵn toàn bộ các hằng số màu thương hiệu vào không g
 | `HUSTBlack` | `#231F20` | Đen tuyền nhận diện tiêu chuẩn (thay cho đen `#000000`) |
 | `HUSTLightBlue` | `#5B9BD5` | Xanh dương nhạt dùng cho thanh tiến trình / biểu đồ |
 | `HUSTLightRed` | `#F05C5D` | Đỏ nhạt dùng cho thanh tiến trình / cảnh báo nhẹ |
-| `HUSTPink` | `#FAD2D2` | Hồng nhạt nền khối / cảnh báo |
+| `HUSTPink` | `#C02035` | Đỏ hồng nhận diện thứ cấp (`RGB(192,32,53)`) |
 | `HUSTGrey` / `HUSTGray` | `#A6A6A6` | Xám phân cách và đường viền phụ |
 | `famiblue` | `#0062A5` | Xanh lam chuẩn huy hiệu Khoa Toán - Tin (FaMI) |
 
@@ -902,6 +901,17 @@ Trên Trang 1 của *Sổ tay hướng dẫn nhận diện thương hiệu ĐHBK
   framebgheight=auto      % Tự động tỉ lệ chuẩn (hoặc truyền số đo tùy ý như 2.4cm)
 ]{HUST}
 ```
+
+---
+
+### 6.26. Tối Ưu Hóa Tốc Độ Biên Dịch (Compile Performance)
+
+Theme được tối ưu toàn diện cho **LuaLaTeX**, giúp rút ngắn thời gian biên dịch đầy đủ bộ slide 26 trang từ ~20s xuống **~8s** (hoặc **~4s** với cấu hình tối giản không dùng `minted`):
+
+- **Tài nguyên đồ họa chuẩn hóa**: Toàn bộ ảnh nền 16:9 (`1920x1080`) và 4:3 (`1600x1200`) được xuất dưới dạng **lossless RGB PNG** (loại bỏ kênh alpha thừa) giúp LuaTeX giải mã nhanh hơn.
+- **Nhúng lại ảnh qua PDF Form XObject**: Các ảnh lặp trên nhiều slide (`headerlogo`, `footerlogo`, `framebg`, `hustlogo`) được cache thành XObject một lần duy nhất trong LuaTeX.
+- **Thuần TeX cho chrome & thanh tiến trình**: Thay thế toàn bộ TikZ overlay lặp lại trên từng frame (`headline`, `frametitle`, `footline`, `progressbar`, `section in toc`, `hustlogo`) bằng box/vrule thuần TeX.
+- **Nạp module có điều kiện**: `minted` ở chế độ chọn thêm (`off` / `auto` tự-frozen / `frozen` / `live`), kèm `\hustnomathextra`, `\hustnocode`, tùy chọn `fast=on` cho bản nháp và cấu hình sẵn `.latexmkrc`.
 
 ---
 

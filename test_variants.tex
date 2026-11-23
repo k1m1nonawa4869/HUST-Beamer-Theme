@@ -12,6 +12,7 @@
 %%   sectionpage = none | panel
 %%   numbering   = none | plain | fraction
 %%   progressbar = on | off
+%%   lang        = vi | en
 %%   footer      = <custom footer text>
 %%   footerleft  = <custom left text>
 %%   logolayout  = 1 | 2 | 3 | 4a | 4b
@@ -25,25 +26,28 @@
   sectionpage=panel,
   numbering=fraction,
   progressbar=on,
+  lang=en,
   dateaddress=on,
-  address={Hà Nội},
+  address={Hanoi},
   logolayout=1,
-  unit={TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG},
+  unit={SCHOOL OF INFORMATION AND COMMUNICATION TECHNOLOGY},
   headerright=pagenumber,
   framebg=on,
   footermeta=on
 ]{HUST}
 
 %% ------------------------------------------------------------- Modular Academic & UX Setup
+%% Enable minted (first pass caches _minted/; subsequent passes auto-use [frozencache] -> ~4s faster)
+\def\hustmintedmode{auto}
 \input{hust-setup}
 
 \usepackage[backend=biber,style=numeric,sorting=none,maxcitenames=2,mincitenames=1]{biblatex}
 \addbibresource{refs.bib}
 
-\title[Xây dựng mẫu trình chiếu Beamer chuẩn nhận diện HUST]{{\normalsize Đồ án nghiên cứu cử nhân}\\[5pt] {\bfseries Xây dựng mẫu trình chiếu Beamer chuẩn nhận diện HUST}}
-\subtitle{Hệ thống trình chiếu LaTeX hiện đại, linh hoạt tỉ lệ và kích thước phông chữ}
-\author[Nguyễn Văn A]{Nguyễn Văn A - 20231234 \\ GVHD: PGS. TS. Lê Văn Thu C}
-\institute{Trường Công nghệ Thông tin và Truyền thông,\\Đại học Bách khoa Hà Nội}
+\title[HUST Brand-Compliant Beamer Presentation Theme]{{\normalsize Undergraduate Research Thesis}\\[5pt] {\bfseries HUST Brand-Compliant Beamer Presentation Theme}}
+\subtitle{Modern LaTeX presentation system with flexible aspect ratios and font families}
+\author[Nguyen Van A]{Nguyen Van A - 20231234 \\ Advisor: Assoc. Prof. Le Van Thu C}
+\institute{School of Information and Communication Technology,\\Hanoi University of Science and Technology}
 \date{\hustdate{8}{7}{2025}}
 
 \begin{document}
@@ -68,161 +72,161 @@
 \end{frame}
 
 %% ------------------------------------------------------------- Section 1
-\section[Quy chuẩn]{Giới thiệu \& quy chuẩn}
-\subsection{Hệ thống nhận diện thương hiệu}
-\begin{frame}[t]{Tạo cụm logo động theo sổ tay thương hiệu}{Quy chuẩn Hình 7 (Việt - Anh) và Hình 9 (Đơn vị thành viên)}
+\section[Brand]{Introduction \& Brand Identity}
+\subsection{Brand Identity System}
+\begin{frame}[t]{Dynamic Logo Lockups per Brand Guidebook}{Standard Fig. 7 (Bilingual) and Fig. 9 (Member Units) Specifications}
   \scriptsize
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
-      \textbf{1. Cụm chính thức Việt - Anh (Hình 7):}
+      \textbf{1. Official Bilingual Lockup (Fig. 7):}
       \vskip0.3em
       \hustlogo[height=0.85cm]
       \vskip0.7em
-      \textbf{2. Bản 2 dòng Việt - Anh (Hình 7b):}
+      \textbf{2. Two-Line Bilingual Variant (Fig. 7b):}
       \vskip0.3em
       \hustlogo[height=0.85cm, layout=2, vn={ĐẠI HỌC\newline BÁCH KHOA HÀ NỘI}, en={HANOI UNIVERSITY\newline OF SCIENCE AND TECHNOLOGY}]
       \vskip0.7em
-      \textbf{3. Đơn vị thành viên 1 dòng (Hình 9):}
+      \textbf{3. Single-Line Member Unit (Fig. 9):}
       \vskip0.3em
       \hustlogo[height=0.85cm, unit={TRƯỜNG CƠ KHÍ}]
     \end{column}
 
     \begin{column}{0.48\textwidth}
-      \textbf{4a. Đơn vị 2 dòng -- ĐHBKHN 2 dòng (Đối xứng):}
+      \textbf{4a. Symmetrical 2-Line Unit -- 2-Line HUST:}
       \vskip0.3em
       \hustlogo[height=0.85cm, layout=4a, unit={VIỆN CÔNG NGHỆ ĐIỀU KHIỂN\newline VÀ TỰ ĐỘNG HÓA}]
       \vskip0.7em
-      \textbf{4b. Đơn vị 2 dòng -- ĐHBKHN 1 dòng (Căn giữa):}
+      \textbf{4b. Centered 2-Line Unit -- 1-Line HUST:}
       \vskip0.3em
       \hustlogo[height=0.85cm, layout=4b, unit={VIỆN CÔNG NGHỆ ĐIỀU KHIỂN\newline VÀ TỰ ĐỘNG HÓA}]
       \vskip0.7em
-      \textbf{5. Cụm logo Khoa Toán - Tin (FaMI, Hình 3):}
+      \textbf{5. Faculty of Math \& Informatics (FaMI, Fig. 3):}
       \vskip0.3em
       \hustlogo[image=fami-shield.png, height=0.85cm, vn={KHOA TOÁN - TIN}, en={Faculty of Mathematics and Informatics}, color=famiblue, equalwidth=false]
     \end{column}
   \end{columns}
 \end{frame}
 
-\subsection{Bảng màu quy chuẩn ĐHBK Hà Nội}
-\begin{frame}{Bảng màu quy chuẩn theo cẩm nang thương hiệu}{Hệ màu chính thức và hoán đổi màu nhận diện trên theme đỏ}
+\subsection{HUST Official Color Palette}
+\begin{frame}{Official Brand Color Palette}{Standardized colors and swapped identity roles on the red theme}
   \small
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
-      \textbf{Màu sắc cốt lõi (Core Colors)}:
+      \textbf{Core Identity Colors}:
       \begin{itemize}\setlength{\itemsep}{3pt}
         \item \textcolor{HUSTRed}{$\blacksquare$ \texttt{HUSTRed} / \texttt{HUSTCrimson}} (\texttt{\#CE1628})\\
-          \scriptsize Đỏ cờ nhận diện cốt lõi của ĐHBK Hà Nội.
+          \scriptsize Primary crimson flag red of HUST.
         \item \textcolor{HUSTYellow}{$\blacksquare$ \texttt{HUSTYellow}} (\texttt{\#F3C108})\\
-          \scriptsize Vàng sao mang lại sự tươi sáng, nhiệt huyết.
+          \scriptsize Star yellow bringing brightness and energy.
         \item \textcolor{HUSTOrange}{$\blacksquare$ \texttt{HUSTOrange}} (\texttt{\#F57F20})\\
-          \scriptsize Cam năng động, thúc đẩy sáng tạo trẻ trung.
+          \scriptsize Dynamic orange inspiring innovation.
       \end{itemize}
     \end{column}
 
     \begin{column}{0.48\textwidth}
-      \textbf{Màu hỗ trợ \& trung tính}:
+      \textbf{Secondary \& Neutral Colors}:
       \begin{itemize}\setlength{\itemsep}{3pt}
-        \item \textcolor{HUSTNavy}{$\blacksquare$ \texttt{HUSTNavy} / \texttt{HUSTBlue}} (\texttt{\#002855})\\
-          \scriptsize Xanh đậm uy tín, biểu trưng học thuật vững bền.
-        \item \textcolor{HUSTGray}{$\blacksquare$ \texttt{HUSTGray}} (\texttt{\#5A6B7C})\\
-          \scriptsize Xám kỹ thuật cân bằng thị giác hiện đại.
-        \item \textcolor{HUSTBlack}{$\blacksquare$ \texttt{HUSTBlack}} (\texttt{\#1A1A1A})\\
-          \scriptsize Đen đậm hiển thị văn bản rõ ràng sắc nét.
+        \item \textcolor{HUSTNavy}{$\blacksquare$ \texttt{HUSTNavy} / \texttt{HUSTBlue}} (\texttt{\#003366})\\
+          \scriptsize Prestige deep navy for academic rigor.
+        \item \textcolor{HUSTGray}{$\blacksquare$ \texttt{HUSTGray}} (\texttt{\#A6A6A6})\\
+          \scriptsize Technical silver-gray for visual balance.
+        \item \textcolor{HUSTBlack}{$\blacksquare$ \texttt{HUSTBlack}} (\texttt{\#231F20})\\
+          \scriptsize Charcoal black for crisp, high-contrast body text.
       \end{itemize}
     \end{column}
   \end{columns}
 \end{frame}
 
 %% ------------------------------------------------------------- Section 2
-\section[Giải thuật]{Các khối nội dung \& giải thuật}
-\subsection{Các loại khối hiển thị}
-\begin{frame}{Các loại khối hiển thị (Beamer blocks)}{Đồng bộ màu sắc nhận diện thương hiệu}
-  \begin{block}{Khối tiêu chuẩn (hustmain)}
-    Khối định nghĩa hoặc thông tin quan trọng được làm nổi bật với màu đỏ nhận diện của trường.
+\section[Blocks]{Content Blocks \& Algorithms}
+\subsection{Display Block Types}
+\begin{frame}{Beamer Display Blocks}{Automatic color synchronization with the active HUST theme}
+  \begin{block}{Standard Block (\texttt{hustmain})}
+    Key definitions and structured highlights framed with the primary HUST red accent.
   \end{block}
 
-  \begin{alertblock}{Khối cảnh báo (hustalert)}
-    Khối cảnh báo hoặc kết luận then chốt sử dụng màu xanh thương hiệu HUST.
+  \begin{alertblock}{Alert Block (\texttt{hustalert})}
+    Critical warnings or key conclusions rendered with HUST secondary navy blue.
   \end{alertblock}
 
-  \begin{exampleblock}{Khối ví dụ (hustorange)}
-    Ví dụ minh họa, mã nguồn hoặc kết quả thực nghiệm với màu cam nhận diện HUST.
+  \begin{exampleblock}{Example Block (\texttt{hustorange})}
+    Worked examples, source snippets, or empirical results styled with HUST orange.
   \end{exampleblock}
 \end{frame}
 
-\subsection{Môi trường định nghĩa \& khối ghi chú}
-\begin{frame}{Môi trường định nghĩa và khối ghi chú}{Đồng bộ màu sắc nhận diện và chú thích tự động}
-  \begin{definition}[Phép toán hai ngôi]
-    Cho tập $X \neq \varnothing$. Một \note{phép toán hai ngôi}{Một ánh xạ từ $X^2 \to X$ gắn mỗi cặp phần tử $(x, y)$ thành một phần tử $x * y \in X$.} trên tập $X$, ký hiệu là $*$, là một quy tắc biến đổi mỗi cặp phần tử $(x, y) \in X^2$ thành phần tử $x * y \in X$. Nói cách khác, phép toán $*$ là một ánh xạ:
+\subsection{Definition Environments \& Footnote Notes}
+\begin{frame}{Definition Environments and Footnote Annotations}{Unified brand styling with interactive hyperlinked annotations}
+  \begin{definition}[Binary Operation]
+    Let $X \neq \varnothing$. A \note{binary operation}{A map $X^2 \to X$ assigning each ordered pair $(x,y)$ to a unique element $x * y \in X$.} on $X$, denoted by $*$, combines any two elements $(x, y) \in X^2$ into an element $x * y \in X$. Equivalently, $*$ is a mapping:
     \[
       (*) : X^2 \longrightarrow X, \quad (x, y) \longmapsto x * y
     \]
   \end{definition}
 
-  \begin{exampleblock}{Nhận xét quan trọng}
-    \warning Các môi trường khối và toán học chuẩn của Beamer (\texttt{block}, \texttt{definition}, \texttt{theorem}, \texttt{exampleblock}) được tinh chỉnh tự động theo bảng màu thương hiệu HUST, hỗ trợ đánh số và tham chiếu chéo thông minh qua \texttt{cleveref}.
+  \begin{exampleblock}{Key Observation}
+    \warning Standard Beamer blocks and theorem environments (\texttt{block}, \texttt{definition}, \texttt{theorem}, \texttt{exampleblock}) automatically inherit the HUST palette, bilingual localization (\texttt{lang=en}), and smart cross-references via \texttt{cleveref}.
   \end{exampleblock}
 \end{frame}
 
-\subsection{Môi trường toán học chuẩn Beamer}
-\begin{frame}{Môi trường toán học chuẩn Beamer}{Định lý, bổ đề, ví dụ và chứng minh khoa học}
+\subsection{Standard Beamer Mathematical Theorems}
+\begin{frame}{Standard Beamer Theorem Environments}{Numbered theorems, lemmas, examples, and formal proofs}
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
-      \begin{theorem}[Hội tụ nghiệm Pareto]
-        Giả sử $C$ là tập lồi đóng và dãy $\{x_k\}$ sinh bởi thuật toán MPG-E. Khi đó $\{x_k\}$ hội tụ yếu về một điểm hữu hiệu Pareto.
+      \begin{theorem}[Pareto Convergence]
+        Assume $C$ is closed and convex, and let $\{x_k\}$ be generated by Algorithm MPG-E. Then $\{x_k\}$ converges weakly to a Pareto optimal point.
       \end{theorem}
       \vskip 2pt
-      \begin{exampleblock}{Tính lồi của hàm mục tiêu}
-        Nếu $f_i$ lồi với mọi $i = 1,\dots,m$ thì mọi cực tiểu cục bộ đều là cực tiểu toàn cục.
+      \begin{exampleblock}{Convexity Property}
+        If every objective $f_i$ ($i = 1,\dots,m$) is convex, any local minimizer is also a global minimizer.
       \end{exampleblock}
     \end{column}
 
     \begin{column}{0.48\textwidth}
-      \begin{lemma}[Bất đẳng thức chiếu]
-        Với mọi $z \in \mathcal{X}$, ta có $\innerp{x - \mathrm{Proj}_{\mathcal{X}}(x)}{\mathrm{Proj}_{\mathcal{X}}(x) - z} \ge 0$.
+      \begin{lemma}[Projection Inequality]
+        \raggedright For every $z \in \mathcal{X}$, $\innerp{x - \mathrm{Proj}_{\mathcal{X}}(x)}{\mathrm{Proj}_{\mathcal{X}}(x) - z} \ge 0$.
       \end{lemma}
       \vskip 2pt
       \begin{proof}
-        Áp dụng tính chất toán tử chiếu không giãn trên tập lồi đóng trong không gian Hilbert.
+        Follows directly from the firm non-expansiveness of the metric projection onto a closed convex set in a Hilbert space.
       \end{proof}
     \end{column}
   \end{columns}
 \end{frame}
 
-\subsection{Tùy biến danh sách (enumitem \& tasks)}
-\begin{frame}[t]{Tùy biến danh sách với enumitem và tasks}{Đánh số dạng ô vuông nhận diện thương hiệu HUST}
+\subsection{Custom Lists (enumitem \& tasks)}
+\begin{frame}[t]{Custom Lists with enumitem and tasks}{HUST square numbered badges and multi-column horizontal lists}
   \small
-  \begin{definition}[Nghiệm Pareto]
+  \begin{definition}[Pareto Optimality]
     \begin{hustsqlist}
-      \item $x^* \in C$ là \emph{nghiệm Pareto} nếu $\nexists x \in C$ sao cho $g_i(x) \le g_i(x^*)$ với mọi $i$ và $g_j(x) < g_j(x^*)$ tại ít nhất một chỉ số $j$. \label{def:pareto}
-      \item $\bar{x} \in C$ là \emph{nghiệm Pareto yếu} nếu $\nexists x \in C$ sao cho $g_i(x) < g_i(\bar{x})$ với mọi $i$.
-      \item Tập hợp tất cả các nghiệm Pareto được gọi là \emph{tập Pareto}. Ảnh của nó trong không gian mục tiêu được gọi là \emph{biên Pareto}.
+      \item $x^* \in C$ is \emph{Pareto optimal} if $\nexists x \in C$ such that $g_i(x) \le g_i(x^*)$ for all $i$ and $g_j(x) < g_j(x^*)$ for at least one index $j$. \label{def:pareto}
+      \item $\bar{x} \in C$ is \emph{weakly Pareto optimal} if $\nexists x \in C$ such that $g_i(x) < g_i(\bar{x})$ for all $i$.
+      \item The set of all Pareto optimal decisions is the \emph{Pareto set}, and its image is the \emph{Pareto front}.
     \end{hustsqlist}
   \end{definition}
   \vskip 2pt
-  \textbf{Phân loại bài toán tối ưu với \texttt{tasks}} (gọi tùy biến với badge ô vuông chữ cái):
+  \textbf{Problem classification using \texttt{tasks}} (with custom alphabetical square badges):
   \begin{tasks}[label=\hustitemsq{\alph*}, label-width=18pt, item-indent=22pt, label-format={\bfseries\color{white}}](2)
-    \task Bài toán lồi đa mục tiêu
-    \task Bài toán không lồi với gradient
-    \task Điều kiện tối ưu Karush-Kuhn-Tucker
-    \task Thuật toán chiếu điểm gần kề
+    \task Convex multi-objective optimization
+    \task Non-convex gradient methods
+    \task Karush-Kuhn-Tucker optimality conditions
+    \task Proximal point projection algorithms
   \end{tasks}
 \end{frame}
 
-\subsection{Toán học chuyên sâu \& biểu đồ TikZ}
-\begin{frame}{Toán học chuyên sâu, tích phân đường cong kín \& TikZ}{Công thức giải tích phức, đạo hàm và tham chiếu chéo}
+\subsection{Advanced Math \& TikZ Diagrams}
+\begin{frame}{Complex Analysis, Contour Integrals \& TikZ Diagrams}{Differential operators, norms, and clickable cross-references}
   \small
   \begin{columns}[c]
     \begin{column}{0.58\textwidth}
-      Áp dụng cho hàm giải tích $f(z)$ trên miền đơn liên có biên cong kín $C$:
+      For an analytic function $f(z)$ inside a simply connected domain bounded by a closed contour $C$:
       \begin{equation}
         \ointctrclockwise_{C} \frac{f(z)}{z - z_0}\,\mathrm{d}z = 2\pi i f(z_0) \label{eq:cauchy}
       \end{equation}
       \begin{itemize}\setlength{\itemsep}{2pt}
-        \item Ký hiệu vector in đậm $\bm{w} \in \mathbb{C}^n$, đạo hàm $\odv{f}{z}$, đạo hàm riêng $\pdv{u}{x} = \pdv{v}{y}$.
-        \item Chuẩn $\norm{z}$, tích vô hướng $\innerp{u}{v}$, tích phân kép $\oiint_{\mathcal{S}} \bm{F}\cdot\mathrm{d}\bm{S}$.
-        \item Tham chiếu chéo tự động: \Cref{eq:cauchy} (hoặc \eqref{eq:cauchy}), \cref{def:pareto}, và \cref{fig:cauchy}.
-        \item Liên kết ngoài trực tiếp: \href{https://hust.edu.vn}{\underline{Trang chủ ĐHBK Hà Nội}}.
+        \item Bold vectors $\bm{w} \in \mathbb{C}^n$, derivatives $\odv{f}{z}$, partial derivatives $\pdv{u}{x} = \pdv{v}{y}$.
+        \item Norms $\norm{z}$, inner products $\innerp{u}{v}$, surface integrals $\oiint_{\mathcal{S}} \bm{F}\cdot\mathrm{d}\bm{S}$.
+        \item Smart cross-references: \Cref{eq:cauchy} (or \eqref{eq:cauchy}), \cref{def:pareto}, and \cref{fig:cauchy}.
+        \item Styled external link: \href{https://hust.edu.vn}{\underline{HUST Official Website}}.
       \end{itemize}
     \end{column}
     \begin{column}{0.40\textwidth}
@@ -236,48 +240,48 @@
         \node[hustmain, font=\scriptsize] at (-0.75, 0.75) {$C$};
       \end{tikzpicture}
       \vskip 2pt
-      \hustcaption[Hình][1]{Miền giải tích $C$}\label{fig:cauchy}
+      \hustcaption[Figure][1]{Analytic domain $C$}\label{fig:cauchy}
     \end{column}
   \end{columns}
 \end{frame}
 
-\subsection{Bảng dữ liệu nâng cao}
-\begin{frame}[t]{Bảng dữ liệu nâng cao với booktabs và tabularx}{Tự động dãn độ rộng cột, gộp ô hàng ngang và hàng dọc}
+\subsection{Structured Data Tables}
+\begin{frame}[t]{Structured Data Tables with booktabs and tabularx}{Automatic column stretching, multi-row cells, and subtle row tinting}
   \scriptsize
-  So sánh hiệu năng thực nghiệm theo các nghiên cứu của Alvarez\cite{alvarez2024} và Bello-Cruz\cite{bellocruz2025}:
+  Experimental benchmark comparison following Alvarez\cite{alvarez2024} and Bello-Cruz\cite{bellocruz2025}:
   \vskip 0.3em
   \centering
   \begin{tabularx}{\textwidth}{l c c X r}
     \toprule
-    \textbf{Phương pháp} & \textbf{Số vòng lặp} & \textbf{Thời gian (s)} & \textbf{Ghi chú thuật toán} & \textbf{Độ chính xác} \\
+    \textbf{Method} & \textbf{Iterations} & \textbf{Time (s)} & \textbf{Algorithmic Notes} & \textbf{Accuracy} \\
     \midrule
-    \multirow{2}{*}{Baseline} & 150 & 12.4 & Gradient Descent cổ điển & 87.5\% \\
-                              & 120 & 10.1 & Thêm điều kiện bước nhảy Armijo & 89.2\% \\
+    \multirow{2}{*}{Baseline} & 150 & 12.4 & Classical gradient descent & 87.5\% \\
+                              & 120 & 10.1 & Added Armijo line-search condition & 89.2\% \\
     \midrule
-    \multirow{2}{*}{Quán tính} & 85  & 6.8  & Nesterov Accelerated Gradient & 93.4\% \\
-                               & 60  & 4.5  & Heavy-ball trong không gian Hilbert\cite{alvarez2024} & \textbf{95.1\%} \\
+    \multirow{2}{*}{Inertial} & 85  & 6.8  & Nesterov accelerated gradient & 93.4\% \\
+                              & 60  & 4.5  & Heavy-ball method in Hilbert space\cite{alvarez2024} & \textbf{95.1\%} \\
     \midrule
     \rowcolor{hustmain!10}
-    \textbf{MPG-E (Đề xuất)} & \textbf{38} & \textbf{2.9} & Chiếu gradient đa mục tiêu\cite{bellocruz2025} & \textbf{96.8\%} \\
+    \textbf{MPG-E (Proposed)} & \textbf{38} & \textbf{2.9} & Multi-objective projected gradient\cite{bellocruz2025} & \textbf{96.8\%} \\
     \bottomrule
   \end{tabularx}
   \vskip 2pt
-  \hustcaption[Bảng][2.5]{So sánh hiệu năng thực nghiệm thuật toán}\label{tab:exp}
+  \hustcaption[Table][2.5]{Experimental algorithm performance comparison}\label{tab:exp}
 \end{frame}
 
-\subsection{Mã giải thuật \& lập trình}
-\begin{frame}[fragile]{Biểu diễn giải thuật tối ưu hóa đa mục tiêu với algorithm2e, listings và minted trong trình chiếu khoa học}{Cấu trúc mã giả khoa học và khối mã nguồn tô màu cú pháp đa ngôn ngữ}
+\subsection{Algorithms \& Syntax-Highlighted Code}
+\begin{frame}[fragile]{Presenting Multi-Objective Optimization Algorithms with algorithm2e, listings, and minted in Technical Slides}{Pseudocode blocks alongside Python and syntax-highlighted C++ implementations}
   \begin{columns}[T]
     \begin{column}{0.49\textwidth}
       \begin{minipage}{\linewidth}
       \begin{algorithm}[H]
         \scriptsize
-        \caption{Thuật toán MPG-E}\label{algo:mpg}
+        \caption{MPG-E Algorithm}\label{algo:mpg}
         \KwIn{$x_0 \in \mathcal{X}$, $\beta \in (0,1)$, $\gamma > 0$}
-        \KwOut{Nghiệm Pareto yếu $x^*$}
+        \KwOut{Weak Pareto solution $x^*$}
         \BlankLine
         \For{$k = 0, 1, 2, \dots$}{
-          $d_k = \argmin_{d} \left\{ \max_i \innerp{\nabla f_i(x_k)}{d} + \frac{1}{2}\norm{d}^2 \right\}$\;
+          $d_k = \argmin_{d}\!\big\{\max_i \innerp{\nabla f_i(x_k)}{d} + \tfrac{1}{2}\norm{d}^2\big\}$\;
           \If{$\norm{d_k} < \epsilon$}{
             \Return $x_k$\;
           }
@@ -295,189 +299,187 @@ def mpg_step(x, grad, alpha=0.01):
     return x + alpha * d_k
 \end{lstlisting}
 \vskip -4pt
-\hustcaption[Listing][1]{Hàm mục tiêu Python (\texttt{listings})}\label{lst:python}
+\hustcaption[Listing][1]{Python update step (\texttt{listings})}\label{lst:python}
 \vskip 2pt
-\begin{minted}{cpp}
-double clip_box(double x, double r) {
-    // Chieu len mien [-r, r]
+\begin{minted}[fontsize=\fontsize{6.5pt}{8pt}\selectfont]{cpp}
+double clip(double x, double r) {
+    // Clamp x to [-r, r]
     return std::clamp(x, -r, r);
 }
 \end{minted}
 \vskip -4pt
-\hustcaption[Listing][2]{Hàm C++ (\texttt{minted}, cần Python \& \texttt{-shell-escape})}\label{lst:cpp}
+\hustcaption[Listing][2]{C++ helper (\texttt{minted}, frozen cache)}\label{lst:cpp}
     \end{column}
   \end{columns}
 \end{frame}
 
 %% ------------------------------------------------------------- Section 3: Biber / BibLaTeX Citations
-\section{Trích dẫn \& tài liệu tham khảo}
-\subsection{Bố cục wrapfig \& trích dẫn}
-\begin{frame}{Trích dẫn tài liệu với bố cục wrapfig}{Bọc văn bản xung quanh logo với số dòng quy định}
+\section[Citations]{Citations \& Bibliography}
+\subsection{wrapfig Text Wrapping}
+\begin{frame}{Citations with wrapfig Layout}{Precision text wrapping around brand emblems across 6 lines}
   \begin{wrapfigure}[6]{r}{0.18\textwidth}
     \vspace{-1.2em}
     \centering
     \includegraphics[width=0.15\textwidth]{assets/hust-shield.png}
   \end{wrapfigure}
-  Nghiên cứu về phương pháp tối ưu hóa đa mục tiêu được đề xuất bởi Bello-Cruz và cộng sự\cite{bellocruz2025} nhằm giải quyết bài toán tìm điểm hữu hiệu trong không gian Hilbert. Mẫu trình chiếu Beamer được phát triển tại \note{ĐHBK Hà Nội}{Trường đại học kỹ thuật hàng đầu Việt Nam, thành lập 1956}\cite{hust2026} với hệ thống nhận diện đồng bộ.
+  Research on multi-objective projected gradient methods was introduced by Bello-Cruz et al.\cite{bellocruz2025} to locate efficient points in Hilbert spaces. This Beamer theme is developed at \note{HUST}{Hanoi University of Science and Technology, founded in 1956}\cite{hust2026} with consistent brand typography.
 
-  Hình ảnh huy hiệu compa và ngôi sao ở bên phải được bao bọc bởi chính xác 6 dòng văn bản nhờ gói \texttt{wrapfig}, đảm bảo sự hài hòa về mặt thị giác trên khung hình thuyết trình.
+  The compass-and-star shield on the right is wrapped cleanly across 6 lines via \texttt{wrapfig}, maintaining balanced visual rhythm on standard 4:3 slides.
 \end{frame}
 
-\subsection{Phương pháp tối ưu hóa đa mục tiêu}
-\begin{frame}{Nghiên cứu tối ưu hóa đa mục tiêu}{Hệ thống tham chiếu chéo toàn diện và trích dẫn tự động}
+\subsection{Multi-Objective Formulation}
+\begin{frame}{Multi-Objective Optimization Study}{End-to-end cross-referencing and automated footnote citations}
   \vspace{-12pt}
-  Xét bài toán tối ưu hóa đa mục tiêu với tập ràng buộc $C \subset \mathbb{R}^n$:
+  Consider the constrained multi-objective problem over $C \subset \mathbb{R}^n$:
   \begin{equation}
     \min_{x \in C} \; F(x) = \big(f_1(x), f_2(x), \dots, f_m(x)\big) \label{eq:mop}
   \end{equation}
-  Nghiên cứu của Bello-Cruz và cộng sự\cite{bellocruz2025} giải quyết \Cref{eq:mop} theo tiêu chuẩn \cref{def:pareto}:
+  Bello-Cruz et al.\cite{bellocruz2025} solve \Cref{eq:mop} under the \cref{def:pareto} optimality criterion:
   \begin{itemize}[nosep]
-    \item \textbf{Mô hình \& hình học}: Bài toán \Cref{eq:mop} liên kết với miền giải tích \cref{fig:cauchy} qua công thức tích phân vi phân \eqref{eq:cauchy}.
-    \item \textbf{Thuật toán \& cài đặt}: Quy trình giải lặp quán tính\cite{alvarez2024} được đặc tả tại \cref{algo:mpg}, mã nguồn mẫu tại \cref{lst:python} và \cref{lst:cpp}.
-    \item \textbf{Hiệu năng thực nghiệm}: Bảng so sánh \cref{tab:exp} khẳng định thuật toán hội tụ về nghiệm Pareto \cref{def:pareto} trên hệ thống chuẩn\cite{hust2026}.
-    \item \textbf{Chân trang thông minh}: Cụm trích dẫn tránh logo (\texttt{footerlogo=hust}), tự động rút gọn \texttt{...} trên 1 dòng.
+    \item \textbf{Model \& geometry}: Problem \Cref{eq:mop} connects to the analytic contour in \cref{fig:cauchy} via Cauchy's formula \eqref{eq:cauchy}.
+    \item \textbf{Algorithm \& code}: The inertial scheme\cite{alvarez2024} is formalized in \cref{algo:mpg} and implemented in \cref{lst:python} and \cref{lst:cpp}.
+    \item \textbf{Empirical evaluation}: Benchmarks in \cref{tab:exp} confirm Pareto convergence\cite{hust2026} matching \cref{def:pareto}.
+    \item \textbf{Smart footer}: Citation strip clears the footer logo (\texttt{footerlogo=hust}) and truncates long entries cleanly with \texttt{...}.
   \end{itemize}
 \end{frame}
 
-\subsection{Thuật toán quán tính trong không gian Hilbert}
-\begin{frame}{Nhiều trích dẫn trên cùng một slide}{Khóa tối đa 4 dòng chân trang: tự động chia 2 cột và rút gọn \texttt{...} khi có $>4$ mục}
+\subsection{Inertial Methods in Hilbert Space}
+\begin{frame}{Dense Citations on a Single Slide}{Strict 4-line footer cap: auto-splits into 2 columns with \texttt{...} for $>4$ items}
   \vspace{-15pt}
-  Các thuật toán giải bài toán tối ưu với định dạng \texttt{tasks} mặc định:
+  Representative optimization schemes rendered with default \texttt{tasks} bullets:
   \begin{tasks}[column-sep=0em](2)
-    \task Phương pháp gradient gần kề\cite{bellocruz2025}
-    \task Thuật toán quán tính Hilbert\cite{alvarez2024}
-    \task Chuẩn hóa nhận diện ĐHBK Hà Nội\cite{hust2026}
-    \task Phương pháp đối ngẫu tăng tốc\cite{nesterov2018}
+    \task Proximal gradient methods\cite{bellocruz2025}
+    \task Inertial Hilbert schemes\cite{alvarez2024}
+    \task HUST brand guidelines\cite{hust2026}
+    \task Accelerated dual methods\cite{nesterov2018}
   \end{tasks}
   \vskip 0.5em
   \begin{itemize}
-    \item Môi trường \texttt{tasks} mặc định kế thừa dấu đầu dòng hình vuông đặc trưng của Beamer itemize.
+    \item By default, \texttt{tasks} inherits the distinctive HUST square bullet from Beamer's \texttt{itemize}.
     \begin{itemize}[nosep]
-      \item Hộp chân trang khóa tối đa \textbf{4 dòng}: tự động rút gọn tên bài báo dài bằng \texttt{...} và chuyển sang \note{bố cục 2 cột}{Tự động kích hoạt khi số trích dẫn và ghi chú trên slide vượt quá 4 dòng} (tối đa 8 mục).
-      \item Phân cấp danh sách cấp 3 (dùng \texttt{enumerate} để \note{đánh số La Mã}{Bộ đếm cấp 3 tự động tăng i, ii, iii chính xác} tự động tăng chính xác):
+      \item Footer overlay locks to \textbf{4 lines} max: truncates long paper titles and activates a \note{2-column layout}{Triggered automatically when combined citations and notes exceed 4 entries} (up to 8 entries).
+      \item Nested 3-level hierarchy using \texttt{enumerate} for \note{Roman numbering}{Third-level counter auto-increments i, ii, iii cleanly}:
       \begin{enumerate}[label = \roman*)]
-        \item Bước kiểm thử thứ nhất (\texttt{i})
-        \item Bước kiểm thử kế tiếp tự động tăng đúng số (\texttt{ii})
+        \item First verification item (\texttt{i})
+        \item Second item automatically incremented (\texttt{ii})
       \end{enumerate}
     \end{itemize}
   \end{itemize}
 \end{frame}
 
-%% ------------------------------------------------------------- Section 4 (Tắt panel slide để minh họa tùy chọn)
-\hustsection[panel=false, alias=Tùy biến]
-\section{Tùy biến \& linh hoạt}
+%% ------------------------------------------------------------- Section 4 (Inline \hustsection showcase)
+\hustsection[panel=false, alias=Options]{Customization \& Flexibility}
 
-\subsection{Bảng tùy chọn theme HUST}
-\begin{frame}{Các tùy chọn của gói theme}{Tùy biến dễ dàng qua \texttt{\textbackslash usetheme} hoặc \texttt{\textbackslash hustsetup}}
+\subsection{Theme Options Reference}
+\begin{frame}{Theme Configuration Options}{Customizable cleanly via \texttt{\textbackslash usetheme} or \texttt{\textbackslash hustsetup}}
   \scriptsize
   \centering
-  \begin{tabularx}{\textwidth}{>{\ttfamily\bfseries\color{hustmain}}r >{\small}X}
-    color       & \texttt{red} (mẫu đỏ đang kích hoạt) hoặc \texttt{blue}. \\
-    font        & \texttt{cm} (mặc định cho toán học), \texttt{lato}, \texttt{times}, hoặc \texttt{arial}. \\
-    titlefont   & \texttt{avantgarde} (mặc định theo sổ tay) hoặc \texttt{same}. \\
-    titlepage   & \texttt{light} (nền chấm mờ cho 4:3, đang bật), \texttt{cover} (nền chấm đậm), \texttt{solid} (nền màu đặc), \texttt{dark}, \texttt{welcome}. \\
-    bar         & \texttt{thin} (thanh mảnh) hoặc \texttt{thick} (thanh dày cho phụ đề). \\
-    progressbar & \texttt{on} (bật thanh tiến trình) hoặc \texttt{off}. \\
-    sectionpage & \texttt{panel} (tạo trang chuyển mục) hoặc \texttt{none}. \\
-    footermeta  & \texttt{on} (hiện tác giả, tiêu đề, ngày ngắn ở chân trang) hoặc \texttt{off}. \\
-    headerright & \texttt{pagenumber} (đang bật số trang trên tiêu đề), \texttt{logo}, hoặc \texttt{off}. \\
-    framebg     & \texttt{on} (họa tiết thoi chéo Sổ tay trang 1, đang bật) hoặc \texttt{off}. \\
-    slogan      & \texttt{on} (hiển thị ONE LOVE. ONE FUTURE.) hoặc \texttt{off}. \\
-    footerlogo  & \texttt{full}, \texttt{mark}, \texttt{wordmark}, \texttt{hust}, hoặc \texttt{none}. \\
-    numbering   & \texttt{fraction} ($n/N$), \texttt{plain} ($n$), hoặc \texttt{none}. \\
-    logolayout  & \texttt{1} (1 dòng), \texttt{2} (2 dòng), \texttt{3} (đơn vị 1 dòng), \texttt{4a}, \texttt{4b}. \\
-    unit        & Tên trường/viện thành viên (1 dòng hoặc 2 dòng kèm \texttt{\textbackslash newline}). \\
-    dateaddress & \texttt{on} (kèm địa danh tiếng Việt) hoặc \texttt{off}. \\
-    address     & Địa danh đi kèm ngày tháng (ví dụ: \texttt{\{Hà Nội\}}). \\
+  \begin{tabularx}{\textwidth}{>{\ttfamily\bfseries\color{hustmain}}r >{\small\raggedright\arraybackslash}X}
+    color       & \texttt{red} (active in this deck) or \texttt{blue}. \\
+    font        & \texttt{cm} (default for math), \texttt{lato}, \texttt{times}, or \texttt{arial}. \\
+    titlefont   & \texttt{avantgarde} (guidebook brand standard) or \texttt{same}. \\
+    titlepage   & \texttt{light} (softened halftone for 4:3, active), \texttt{cover}, \texttt{solid}, \texttt{dark}, \texttt{welcome}. \\
+    bar         & \texttt{thin} (slender rule) or \texttt{thick} (contains subtitle). \\
+    progressbar & \texttt{on} (top section/subsection bar) or \texttt{off}. \\
+    sectionpage & \texttt{panel} (split section divider) or \texttt{none}. \\
+    footermeta  & \texttt{on} (author, title, short date strip) or \texttt{off}. \\
+    headerright & \texttt{pagenumber} (active in header band), \texttt{logo}, or \texttt{off}. \\
+    framebg     & \texttt{on} (diagonal diamond texture from guidebook p.~1, active) or \texttt{off}. \\
+    lang        & \texttt{en} (English dates, TOC, refs, theorems, \texttt{cleveref}; active) or \texttt{vi} (default). \\
+    fast        & \texttt{on} (skips heavy bitmap overlays for fast drafts) or \texttt{off}. \\
+    footerlogo  & \texttt{full}, \texttt{mark}, \texttt{wordmark}, \texttt{hust}, or \texttt{none}. \\
+    numbering   & \texttt{fraction} ($n/N$), \texttt{plain} ($n$), or \texttt{none}. \\
+    logolayout  & \texttt{1} (1-line), \texttt{2} (2-line), \texttt{3} (1-line unit), \texttt{4a}, \texttt{4b}. \\
+    dateaddress & \texttt{on} (prepends city to date) or \texttt{off}. \\
+    address     & Custom city before date (e.g.\ \texttt{\{Hanoi\}}). \\
   \end{tabularx}
 \end{frame}
 
-\subsection{Các kiểu khung hình (Frame Types)}
-\begin{frame}{Các kiểu khung hình và môi trường slide}{Danh mục khung hình chuyên dụng kèm tùy chọn đối số}
+\subsection{Specialized Frame Environments}
+\begin{frame}{Frame Environments and Macros}{Purpose-built HUST slide templates and helper commands}
   \scriptsize
   \centering
-  \begin{tabularx}{\textwidth}{>{\ttfamily\bfseries\color{hustmain}}r >{\small}X}
-    frame               & Khung cơ bản: \texttt{[t|c|b]}, \texttt{[plain]}, \texttt{[fragile]}, \texttt{[noframenumbering]}, \texttt{[noprogressbar]}. \\
-    hustwelcomeframe    & Khung mở đầu / chào mừng: \texttt{[bg=dark|background|cover]}, \texttt{[footer=true|false]}. \\
-    hustdarkframe       & Khung nền màu đậm nhận diện thương hiệu (slide kết luận, Q\&A). \\
-    hustbackgroundframe & Khung nền hoa văn chìm dải sóng đồ họa HUST toàn trang. \\
-    hustreferencesframe & Khung tài liệu tham khảo phân trang thủ công: \texttt{[from=N, to=M]}. \\
-    hustsection         & Điều khiển bật/tắt slide chuyển mục cho \texttt{\textbackslash section}: \texttt{[panel=true|false]}. \\
-    \textbackslash note & Ghi chú chân trang chữ cái ($a, b, \dots$) đồng bộ vị trí cùng \texttt{\textbackslash cite}. \\
+  \begin{tabularx}{\textwidth}{>{\ttfamily\bfseries\color{hustmain}}r >{\small\raggedright\arraybackslash}X}
+    frame               & Standard frame: \texttt{[t|c|b]}, \texttt{[plain]}, \texttt{[fragile]}, \texttt{[noframenumbering]}, \texttt{[noprogressbar]}. \\
+    hustwelcomeframe    & Opening welcome screen: \texttt{[bg=dark|background|cover]}, \texttt{[footer=...]}. \\
+    hustdarkframe       & Deep solid brand-colored closing / Q\&A slide. \\
+    hustbackgroundframe & Full-bleed HUST wave graphic background frame. \\
+    hustreferencesframe & Paginated bibliography slide: \texttt{[from=N, to=M]}. \\
+    hustsection         & Inline or prefix panel/alias control: \texttt{\textbackslash hustsection[panel=false, alias=Short]\{Title\}}. \\
+    \textbackslash note & Hyperlinked lettered footnote annotation ($a, b, \dots$) paired with \texttt{\textbackslash cite}. \\
   \end{tabularx}
 \end{frame}
 
-\subsection{Gợi ý phối màu \& tỉ lệ Beamer}
-\begin{frame}{Gợi ý phối màu và tỉ lệ hiển thị Beamer}{Hệ màu bổ trợ mở rộng, phông chữ và các tỉ lệ màn hình hỗ trợ}
+\subsection{Color Tips \& Supported Aspect Ratios}
+\begin{frame}{Recommended Colors and Aspect Ratios}{Block tint recipes, font recommendations, and all Beamer aspect ratios}
   \footnotesize
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
-      \textbf{Màu nền gợi ý}:
+      \textbf{Suggested Block Tints}:
       \begin{itemize}\setlength{\itemsep}{1pt}
-        \item \colorbox{hustmain!8}{\texttt{hustmain!8}}: Nền khối tiêu chuẩn (\texttt{block}).
-        \item \colorbox{hustalert!10}{\texttt{hustalert!10}}: Nền khối cảnh báo (\texttt{alertblock}).
-        \item \colorbox{hustexample!12}{\texttt{hustexample!12}}: Nền khối ví dụ (\texttt{exampleblock}).
+        \item \colorbox{hustmain!8}{\texttt{hustmain!8}}: Subtle standard block tint.
+        \item \colorbox{hustalert!10}{\texttt{hustalert!10}}: Soft alert block tint.
+        \item \colorbox{hustexample!12}{\texttt{hustexample!12}}: Warm example block tint.
       \end{itemize}
       \vskip 0.2em
-      \textbf{Khuyến nghị phông chữ}:
+      \textbf{Font Recommendations}:
       \begin{itemize}\setlength{\itemsep}{1pt}
-        \item \texttt{cm}: Kinh điển, chuẩn công thức toán (đang áp dụng).
-        \item \texttt{lato}: Hiện đại, bài giảng công nghệ.
-        \item \texttt{times}: Trang trọng, đồ án tốt nghiệp.
-        \item \texttt{arial}: Nét đậm, dễ đọc từ khoảng cách xa.
+        \item \texttt{cm}: Classic Computer Modern for math (active).
+        \item \texttt{lato}: Modern corporate/CS lectures.
+        \item \texttt{times}: Formal thesis defenses.
+        \item \texttt{arial}: High-legibility large halls.
       \end{itemize}
     \end{column}
 
     \begin{column}{0.48\textwidth}
-      \textbf{Tất cả tỉ lệ Beamer hỗ trợ}:
+      \textbf{All Supported Aspect Ratios}:
       \begin{itemize}\setlength{\itemsep}{1pt}
-        \item \texttt{43}: 4:3 máy chiếu truyền thống (đang áp dụng).
-        \item \texttt{169}: 16:9 widescreen màn hình LED, TV.
-        \item \texttt{1610}: 16:10 màn hình laptop hiện đại.
-        \item \texttt{149}: 14:9 tỉ lệ trung gian cân đối.
-        \item \texttt{54}: 5:4 màn hình máy trạm chuyên dụng.
-        \item \texttt{32}: 3:2 máy tính bảng Surface.
-        \item \texttt{141}: 1.41:1 chuẩn tương đương khổ giấy A4.
+        \item \texttt{43}: 4:3 classic projectors (active).
+        \item \texttt{169}: 16:9 widescreen displays \& LED walls.
+        \item \texttt{1610}: 16:10 modern laptops.
+        \item \texttt{149}: 14:9 balanced intermediate ratio.
+        \item \texttt{54}: 5:4 technical workstations.
+        \item \texttt{32}: 3:2 tablet presentations.
+        \item \texttt{141}: 1.41:1 ISO A-series handout scale.
       \end{itemize}
     \end{column}
   \end{columns}
 \end{frame}
 
-\subsection{Yêu cầu cài đặt \& biên dịch}
-\begin{frame}{Yêu cầu phần mềm và quy trình biên dịch}{Hướng dẫn thiết lập môi trường TeXstudio, MiKTeX và Overleaf}
+\subsection{Installation \& Build Workflow}
+\begin{frame}{Toolchain Setup and Build Workflow}{Recommended setup for TeXstudio, MiKTeX, latexmk, and Overleaf}
   \small
   \begin{columns}[T]
     \begin{column}{0.50\textwidth}
-      \textbf{1. Phần mềm \& Ứng dụng hỗ trợ}:
+      \textbf{1. Recommended Editors \& Distributions}:
       \begin{itemize}\setlength{\itemsep}{2pt}
-        \item \textbf{TeXstudio} (Khuyến nghị sử dụng offline).
-        \item \textbf{MiKTeX / TeX Live} (Hệ phân phối LaTeX).
-        \item \textbf{Overleaf}: Hoạt động trực tiếp trên trình duyệt.
+        \item \textbf{TeXstudio} (recommended offline editor).
+        \item \textbf{MiKTeX / TeX Live} (full LaTeX distributions).
+        \item \textbf{Overleaf}: Change compiler to LuaLaTeX in Menu.
       \end{itemize}
       \vskip 0.3em
-      \textbf{2. Trình biên dịch bắt buộc}:
+      \textbf{2. Required Unicode Compiler}:
       \begin{itemize}\setlength{\itemsep}{2pt}
-        \item \textbf{LuaLaTeX} (Khuyến nghị số 1) hoặc \textbf{XeLaTeX} để nạp phông hệ thống và tiếng Việt Unicode.
-        \item Không dùng \texttt{pdfLaTeX} (không nạp được OTF/TTF).
+        \item \textbf{LuaLaTeX} (recommended for speed \& XObject caching) or \textbf{XeLaTeX}.
+        \item Do not use \texttt{pdfLaTeX} (no OpenType/TTF fonts).
       \end{itemize}
     \end{column}
 
     \begin{column}{0.48\textwidth}
-      \textbf{3. Trình xử lý tài liệu tham khảo}:
+      \textbf{3. Bibliography \& Opt-in Code}:
       \begin{itemize}\setlength{\itemsep}{2pt}
-        \item Sử dụng \textbf{Biber} kết hợp gói \texttt{biblatex}.
-        \item Quy trình biên dịch:
+        \item Uses \textbf{Biber} + \texttt{biblatex} or \texttt{latexmk}:
           \[
             \text{Lua\LaTeX} \longrightarrow \text{Biber} \longrightarrow \text{Lua\LaTeX}
           \]
+        \item \texttt{minted} is opt-in (\texttt{off} by default), so regular decks build cleanly without Python or \texttt{-shell-escape}.
       \end{itemize}
       \vskip 0.3em
-      \textbf{4. Cấu hình TeXstudio (1 chạm)}:
+      \textbf{4. TeXstudio Build Menu}:
       \begin{itemize}\scriptsize\setlength{\itemsep}{2pt}
         \item \textit{Options $\to$ Configure TeXstudio $\to$ Build}:
-        \item \textbf{Default Compiler}: chọn \texttt{LuaLaTeX} (thêm cờ \texttt{-shell-escape} và cài \textbf{Python} nếu dùng \texttt{minted}).
-        \item \textbf{Default Bibliography}: chọn \texttt{Biber}.
-        \item Nhấn \textbf{F5} để biên dịch toàn bộ.
+        \item \textbf{Default Compiler}: \texttt{LuaLaTeX} (add \texttt{-shell-escape} only on first \texttt{minted} cache build).
+        \item \textbf{Default Bibliography}: \texttt{Biber}, then press \textbf{F5}.
       \end{itemize}
     \end{column}
   \end{columns}
@@ -494,7 +496,7 @@ double clip_box(double x, double r) {
 \begin{hustdarkframe}
   \centering
   \vspace*{0.2\paperheight}
-  {\Huge\bfseries\color{white} CẢM ƠN QUÝ THẦY CÔ\\VÀ CÁC BẠN ĐÃ LẮNG NGHE!\par}
+  {\Huge\bfseries\color{white} THANK YOU FOR YOUR\\ATTENTION!\par}
   \vspace{1.5em}
   {\large\color{white!85} Q \& A\par}
 \end{hustdarkframe}

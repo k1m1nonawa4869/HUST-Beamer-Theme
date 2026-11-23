@@ -57,8 +57,52 @@
 \colorlet{HUSTAmber}{hustamber}
 \definecolor{titlepagecolor}{cmyk}{1,.60,0,.40}
 
-%% ------------------------------------------------------------------ assets
+%% ------------------------------------------------------------------ assets & XObject cache
 \graphicspath{{assets/}{./assets/}{hust-beamer/assets/}{./hust-beamer/assets/}}
+
+%% Cache repeated images as PDF Form XObjects (LuaTeX) or global saveboxes (XeTeX)
+\newsavebox\hust@xtmp
+\newcommand{\hust@use@cachedimg}[3]{%
+  \ifdefined\saveboxresource
+    \ifcsname hust@xobj@#1\endcsname\else
+      \setbox\hust@xtmp=\hbox{\includegraphics[#2]{#3}}%
+      \saveboxresource\hust@xtmp\relax
+      \expandafter\xdef\csname hust@xobj@#1\endcsname{\the\lastsavedboxresourceindex}%
+    \fi
+    \useboxresource\csname hust@xobj@#1\endcsname\relax
+  \else
+    \ifcsname hust@imgbox@#1\endcsname\else
+      \expandafter\newsavebox\csname hust@imgbox@#1\endcsname
+      \global\expandafter\setbox\csname hust@imgbox@#1\endcsname=\hbox{\includegraphics[#2]{#3}}%
+    \fi
+    \expandafter\copy\csname hust@imgbox@#1\endcsname
+  \fi
+}
+\newcommand{\hust@use@cachedopacityimg}[4]{%
+  \ifdefined\saveboxresource
+    \ifcsname hust@xobj@#1\endcsname\else
+      \setbox\hust@xtmp=\hbox{\tikz[baseline=(husti.south)]\node[inner sep=0pt,outer sep=0pt,opacity=#2](husti){\includegraphics[#3]{#4}};}%
+      \saveboxresource\hust@xtmp\relax
+      \expandafter\xdef\csname hust@xobj@#1\endcsname{\the\lastsavedboxresourceindex}%
+    \fi
+    \useboxresource\csname hust@xobj@#1\endcsname\relax
+  \else
+    \ifcsname hust@imgbox@#1\endcsname\else
+      \expandafter\newsavebox\csname hust@imgbox@#1\endcsname
+      \global\expandafter\setbox\csname hust@imgbox@#1\endcsname=\hbox{\tikz[baseline=(husti.south)]\node[inner sep=0pt,outer sep=0pt,opacity=#2](husti){\includegraphics[#3]{#4}};}%
+    \fi
+    \expandafter\copy\csname hust@imgbox@#1\endcsname
+  \fi
+}
+
+%% Prevent hyperref PDF-string Unicode warnings on \\, \newline, \hustdate in \title/\author/\date
+\ifdefined\pdfstringdefDisableCommands
+  \pdfstringdefDisableCommands{%
+    \def\\{, }%
+    \def\newline{, }%
+    \def\hustdate#1#2#3#4{#2/#3/#4}%
+  }%
+\fi
 
 %% ------------------------------------------------------- ratio -> profile
 \newif\ifhust@wide
@@ -134,6 +178,8 @@
 \def\hustrefsubtitle{}
 \newif\ifhust@sec@showpanel
 \hust@sec@showpaneltrue
+\newif\ifhust@fast
+\hust@fastfalse
 \def\hust@logounit{}
 \def\hust@logovn{ĐẠI HỌC BÁCH KHOA HÀ NỘI}
 \def\hust@logoen{HANOI UNIVERSITY OF SCIENCE AND TECHNOLOGY}
@@ -148,6 +194,14 @@
 \newif\ifhust@dateaddress
 \hust@dateaddresstrue
 \def\hust@date@address{Hà Nội}
+\newif\ifhust@lang@en
+\hust@lang@enfalse
+\newif\ifhust@toctitle@set
+\hust@toctitle@setfalse
+\newif\ifhust@reftitle@set
+\hust@reftitle@setfalse
+\newif\ifhust@address@set
+\hust@address@setfalse
 \newif\ifhust@footermeta
 \hust@footermetafalse
 \def\hust@footer@author{}
@@ -239,36 +293,103 @@
 \newcount\hust@tlow
 \newcount\hust@thigh
 \newcount\hust@tmid
-\def\hust@tbest{...}
+\newcount\hust@tbestk
 
 \directlua{
-  hust_t_str = ""
+  hust_t_toks = {}
+  hust_t_ntoks = 0
+  local bs = string.char(92)
+  local lb = string.char(123)
+  local rb = string.char(125)
+  local dl = string.char(36)
+  local function hust_utf8_clen(s, pos)
+    local b = string.byte(s, pos)
+    if not b then return 0 end
+    if b < 128 then return 1
+    elseif b < 224 then return 2
+    elseif b < 240 then return 3
+    else return 4 end
+  end
   function hust_t_set(s)
-    hust_t_str = s
-    return unicode.utf8.len(s)
+    hust_t_toks = {}
+    hust_t_ntoks = 0
+    s = string.gsub(s, bs .. "protect[ ]+", "")
+    local pos = 1
+    local n = string.len(s)
+    while pos <= n do
+      if string.byte(s, pos) == 92 then
+        local cw = string.match(s, "^" .. bs .. "[A-Za-z]+[ ]*", pos)
+        if cw then
+          hust_t_ntoks = hust_t_ntoks + 1
+          hust_t_toks[hust_t_ntoks] = cw
+          pos = pos + string.len(cw)
+        else
+          local cl = hust_utf8_clen(s, pos + 1)
+          local tok = string.sub(s, pos, pos + cl)
+          hust_t_ntoks = hust_t_ntoks + 1
+          hust_t_toks[hust_t_ntoks] = tok
+          pos = pos + cl + 1
+        end
+      else
+        local cl = hust_utf8_clen(s, pos)
+        if cl < 1 then cl = 1 end
+        hust_t_ntoks = hust_t_ntoks + 1
+        hust_t_toks[hust_t_ntoks] = string.sub(s, pos, pos + cl - 1)
+        pos = pos + cl
+      end
+    end
+    return hust_t_ntoks
   end
   function hust_t_sub(k)
-    local sub = unicode.utf8.sub(hust_t_str, 1, k)
-    while string.sub(sub, -1) == " " do
-      sub = string.sub(sub, 1, -2)
+    local sub = table.concat(hust_t_toks, "", 1, k)
+    while true do
+      local prev = sub
+      sub = string.gsub(sub, "[ ]+$", "")
+      sub = string.gsub(sub, bs .. "[A-Za-z]+[ ]*" .. lb .. "$", "")
+      if string.sub(sub, -1) == lb and not (string.sub(sub, -2) == (bs .. lb)) then
+        sub = string.sub(sub, 1, -2)
+      end
+      if not string.match(sub, bs .. "TeX[ ]*$") and not string.match(sub, bs .. "LaTeX[ ]*$") then
+        sub = string.gsub(sub, bs .. "[A-Za-z]+$", "")
+      end
+      if string.sub(sub, -1) == bs and not (string.sub(sub, -2) == (bs .. bs)) then
+        sub = string.sub(sub, 1, -2)
+      end
+      if sub == prev then break end
     end
-    local bs = string.match(sub, "\\+$")
-    if bs and math.fmod(string.len(bs), 2) == 1 then
-      sub = string.sub(sub, 1, -2)
+    local stack = {}
+    local sn = 0
+    local i = 1
+    local n = string.len(sub)
+    while i <= n do
+      local b = string.byte(sub, i)
+      if b == 92 then
+        i = i + 2
+      else
+        local c = string.sub(sub, i, i)
+        if c == dl then
+          if sn > 0 and stack[sn] == dl then
+            stack[sn] = nil
+            sn = sn - 1
+          else
+            sn = sn + 1
+            stack[sn] = dl
+          end
+        elseif c == lb then
+          sn = sn + 1
+          stack[sn] = rb
+        elseif c == rb then
+          if sn > 0 and stack[sn] == rb then
+            stack[sn] = nil
+            sn = sn - 1
+          end
+        end
+        i = i + 1
+      end
     end
-    local dl = string.char(36)
-    local lb = string.char(123)
-    local rb = string.char(125)
-    local open_b = 0
-    local open_m = false
-    for i = 1, string.len(sub) do
-      local c = string.sub(sub, i, i)
-      if c == dl then open_m = not open_m
-      elseif c == lb then open_b = open_b + 1
-      elseif c == rb and open_b > 0 then open_b = open_b - 1 end
+    for j = sn, 1, -1 do
+      sub = sub .. stack[j]
     end
-    if open_m then sub = sub .. dl end
-    if open_b > 0 then sub = sub .. string.rep(rb, open_b) end
     tex.sprint(sub .. "...")
   end
 }
@@ -280,11 +401,15 @@
     \setbox\hust@tbox=\hbox{\hust@t@str}%
     \ifdim\wd\hust@tbox>#1\relax
       \hust@tmax=#1\relax
-      \hust@thigh=\directlua{tex.sprint(hust_t_set("\luaescapestring{\hust@t@str}"))}\relax
+      \hust@thigh=\directlua{tex.sprint(hust_t_set("\luaescapestring{\unexpanded\expandafter{\hust@t@str}}"))}\relax
       \hust@tlow=1\relax
-      \def\hust@tbest{...}%
+      \global\hust@tbestk=0\relax
       \hust@tloop{#2}%
-      \hust@tbest
+      \ifnum\hust@tbestk>0\relax
+        \directlua{hust_t_sub(\the\hust@tbestk)}%
+      \else
+        ...%
+      \fi
     \else
       \hust@t@str
     \fi
@@ -300,15 +425,10 @@
       \ifdim\wd\hust@tbox>\hust@tmax\relax
         \global\hust@thigh=\numexpr\hust@tmid - 1\relax
       \else
-        \global\let\hust@tmpbest\relax
-        \xdef\hust@tmpbest{\directlua{hust_t_sub(\the\hust@tmid)}}%
+        \global\hust@tbestk=\hust@tmid\relax
         \global\hust@tlow=\numexpr\hust@tmid + 1\relax
       \fi
     \endgroup
-    \ifx\hust@tmpbest\relax\else
-      \let\hust@tbest\hust@tmpbest
-      \global\let\hust@tmpbest\relax
-    \fi
     \hust@tloop{#1}%
   \fi
 }
@@ -395,7 +515,7 @@
   wordmark/true/.code={\def\hust@wordmark{on}},
   wordmark/off/.code={\def\hust@wordmark{off}},
   wordmark/false/.code={\def\hust@wordmark{off}},
-  toctitle/.code={\def\husttoctitle{#1}},
+  toctitle/.code={\hust@toctitle@settrue\def\husttoctitle{#1}},
   tocsubtitle/.code={%
     \def\hust@tmp{#1}%
     \ifdefstring{\hust@tmp}{Hidden}{\def\husttocsubtitle{}}{%
@@ -406,7 +526,7 @@
       }%
     }%
   },
-  reftitle/.code={\def\hustreftitle{#1}},
+  reftitle/.code={\hust@reftitle@settrue\def\hustreftitle{#1}},
   refsubtitle/.code={%
     \def\hust@tmp{#1}%
     \ifdefstring{\hust@tmp}{Hidden}{\def\hustrefsubtitle{}}{%
@@ -498,9 +618,10 @@
   dateaddress/none/.code={\hust@dateaddressfalse},
   address/.code={%
     \def\hust@tmp{#1}%
-    \ifdefstring{\hust@tmp}{none}{\hust@dateaddressfalse}{%
-      \ifdefstring{\hust@tmp}{off}{\hust@dateaddressfalse}{%
-        \ifdefstring{\hust@tmp}{false}{\hust@dateaddressfalse}{%
+    \ifdefstring{\hust@tmp}{none}{\hust@address@settrue\hust@dateaddressfalse}{%
+      \ifdefstring{\hust@tmp}{off}{\hust@address@settrue\hust@dateaddressfalse}{%
+        \ifdefstring{\hust@tmp}{false}{\hust@address@settrue\hust@dateaddressfalse}{%
+          \hust@address@settrue
           \hust@dateaddresstrue
           \def\hust@date@address{#1}%
         }%
@@ -509,9 +630,10 @@
   },
   location/.code={%
     \def\hust@tmp{#1}%
-    \ifdefstring{\hust@tmp}{none}{\hust@dateaddressfalse}{%
-      \ifdefstring{\hust@tmp}{off}{\hust@dateaddressfalse}{%
-        \ifdefstring{\hust@tmp}{false}{\hust@dateaddressfalse}{%
+    \ifdefstring{\hust@tmp}{none}{\hust@address@settrue\hust@dateaddressfalse}{%
+      \ifdefstring{\hust@tmp}{off}{\hust@address@settrue\hust@dateaddressfalse}{%
+        \ifdefstring{\hust@tmp}{false}{\hust@address@settrue\hust@dateaddressfalse}{%
+          \hust@address@settrue
           \hust@dateaddresstrue
           \def\hust@date@address{#1}%
         }%
@@ -520,9 +642,10 @@
   },
   datecity/.code={%
     \def\hust@tmp{#1}%
-    \ifdefstring{\hust@tmp}{none}{\hust@dateaddressfalse}{%
-      \ifdefstring{\hust@tmp}{off}{\hust@dateaddressfalse}{%
-        \ifdefstring{\hust@tmp}{false}{\hust@dateaddressfalse}{%
+    \ifdefstring{\hust@tmp}{none}{\hust@address@settrue\hust@dateaddressfalse}{%
+      \ifdefstring{\hust@tmp}{off}{\hust@address@settrue\hust@dateaddressfalse}{%
+        \ifdefstring{\hust@tmp}{false}{\hust@address@settrue\hust@dateaddressfalse}{%
+          \hust@address@settrue
           \hust@dateaddresstrue
           \def\hust@date@address{#1}%
         }%
@@ -624,12 +747,38 @@
   diagbgheight/.store in=\hust@framebg@height,
   textureheight/.store in=\hust@framebg@height,
   coverlightopacity/.store in=\hust@coverlight@opacity,
+  fast/.is choice,
+  fast/on/.code={\hust@fasttrue},
+  fast/true/.code={\hust@fasttrue},
+  fast/off/.code={\hust@fastfalse},
+  fast/false/.code={\hust@fastfalse},
+  fast/.default=on,
+  lang/.is choice,
+  lang/vi/.code={%
+    \hust@lang@enfalse
+    \ifhust@toctitle@set\else\def\husttoctitle{Nội dung chính}\fi
+    \ifhust@reftitle@set\else\def\hustreftitle{Tài liệu tham khảo}\fi
+    \ifhust@address@set\else\def\hust@date@address{Hà Nội}\fi
+  },
+  lang/vn/.code={\pgfkeys{/hust/lang=vi}},
+  lang/vietnamese/.code={\pgfkeys{/hust/lang=vi}},
+  lang/en/.code={%
+    \hust@lang@entrue
+    \ifhust@toctitle@set\else\def\husttoctitle{Outline}\fi
+    \ifhust@reftitle@set\else\def\hustreftitle{References}\fi
+    \ifhust@address@set\else\def\hust@date@address{Hanoi}\fi
+  },
+  lang/english/.code={\pgfkeys{/hust/lang=en}},
 }
 %% defaults = the look of the PPTX template & Brand Guidebook (Avant Garde titles, Lato body)
 \pgfkeys{/hust/.cd, color=blue, font=lato, titlefont=avantgarde, footerlogo=full,
   bar=thin, titlepage=cover, coverbg=cover, sectionpage=none, numbering=plain, slogan=on,
   wordmark=on, panelsocial=on, logomode=vector, logolayout=2,
-  logo2sep=none, logo2layout=1, progressbar=off, dateaddress=on, address={Hà Nội}}
+  logo2sep=none, logo2layout=1, progressbar=off, dateaddress=on, address={Hà Nội}, lang=vi}
+%% Allow user options (e.g. lang=en) to switch default titles/address unless explicitly overridden
+\hust@toctitle@setfalse
+\hust@reftitle@setfalse
+\hust@address@setfalse
 
 %% \hustsetup{...} may be used anywhere in the preamble after \usetheme{HUST}
 \newcommand*\hustsetup[1]{\pgfkeys{/hust/.cd,#1}}
@@ -650,27 +799,42 @@
   \fi
 }
 
-%% ------------------------------------------------------------ Vietnamese Date Format
+%% ------------------------------------------------------------ Date Format (vi | en)
+\newcommand{\hust@en@month}[1]{%
+  \ifcase#1\or January\or February\or March\or April\or May\or June%
+  \or July\or August\or September\or October\or November\or December\fi
+}
 \newcommand{\hust@set@today}{%
   \def\today{%
-    \ifhust@dateaddress
-      \ifx\hust@date@address\@empty
-        ngày \number\day\ tháng \number\month\ năm \number\year
+    \ifhust@lang@en
+      \ifhust@dateaddress
+        \ifx\hust@date@address\@empty
+          \hust@en@month{\month}\ \number\day, \number\year
+        \else
+          \hust@date@address, \hust@en@month{\month}\ \number\day, \number\year
+        \fi
       \else
-        \hust@date@address, ngày \number\day\ tháng \number\month\ năm \number\year
+        \hust@en@month{\month}\ \number\day, \number\year
       \fi
     \else
-      ngày \number\day\ tháng \number\month\ năm \number\year
+      \ifhust@dateaddress
+        \ifx\hust@date@address\@empty
+          ngày \number\day\ tháng \number\month\ năm \number\year
+        \else
+          \hust@date@address, ngày \number\day\ tháng \number\month\ năm \number\year
+        \fi
+      \else
+        ngày \number\day\ tháng \number\month\ năm \number\year
+      \fi
     \fi
   }%
 }
 \hust@set@today
 \AtBeginDocument{\hust@set@today}
 
-%% Helper to output an arbitrary Vietnamese date with optional custom address:
-%%   \hustdate{8}{7}{2025} -> "Hà Nội, ngày 8 tháng 7 năm 2025" (when address is on)
-%%   \hustdate[TP. Hồ Chí Minh]{8}{7}{2025} -> "TP. Hồ Chí Minh, ngày 8 tháng 7 năm 2025"
-%%   \hustdate[none]{8}{7}{2025} -> "ngày 8 tháng 7 năm 2025"
+%% Helper to output an arbitrary date with optional custom address:
+%%   lang=vi: \hustdate{8}{7}{2025} -> "Hà Nội, ngày 8 tháng 7 năm 2025"
+%%   lang=en: \hustdate{8}{7}{2025} -> "Hanoi, July 8, 2025"
 \newcommand{\hustdate}[4][]{%
   \gdef\hust@recorded@shortdate{\ifnum#2<10 0\fi\number#2/\ifnum#3<10 0\fi\number#3/\number#4}%
   \begingroup
@@ -684,19 +848,24 @@
         }%
       }%
     }%
+    \ifhust@lang@en
+      \def\hust@dbody{\hust@en@month{#3}\ \number#2, #4}%
+    \else
+      \def\hust@dbody{ngày #2 tháng #3 năm #4}%
+    \fi
     \ifhust@dateaddress
       \ifx\hust@tmp@addr\@empty
-        ngày #2 tháng #3 năm #4%
+        \hust@dbody
       \else
-        \hust@tmp@addr, ngày #2 tháng #3 năm #4%
+        \hust@tmp@addr, \hust@dbody
       \fi
     \else
       \ifstrempty{#1}{%
-        ngày #2 tháng #3 năm #4%
+        \hust@dbody
       }{%
-        \ifstrequal{#1}{none}{ngày #2 tháng #3 năm #4}{%
-          \ifstrequal{#1}{off}{ngày #2 tháng #3 năm #4}{%
-            #1, ngày #2 tháng #3 năm #4%
+        \ifstrequal{#1}{none}{\hust@dbody}{%
+          \ifstrequal{#1}{off}{\hust@dbody}{%
+            #1, \hust@dbody
           }%
         }%
       }%
@@ -743,18 +912,19 @@
 %%   - Hình 7: Cụm logo chính thức Việt - Anh (Bilingual)
 %%   - Hình 9: Logo kết hợp đơn vị thành viên (Member institution / school / institute)
 \IfFontExistsTF{TeX Gyre Adventor}{%
-  \newfontfamily\hust@logofont{TeX Gyre Adventor}[Ligatures=TeX]
+  \newfontfamily\hust@brandfamily{TeX Gyre Adventor}[Ligatures=TeX]
 }{%
   \IfFontExistsTF{AvantGarde}{%
-    \newfontfamily\hust@logofont{AvantGarde}[Ligatures=TeX]
+    \newfontfamily\hust@brandfamily{AvantGarde}[Ligatures=TeX]
   }{%
     \IfFontExistsTF{Arial}{%
-      \newfontfamily\hust@logofont{Arial}[Ligatures=TeX]
+      \newfontfamily\hust@brandfamily{Arial}[Ligatures=TeX]
     }{%
-      \let\hust@logofont\sffamily
+      \let\hust@brandfamily\sffamily
     }%
   }%
 }
+\let\hust@logofont\hust@brandfamily
 
 \newdimen\hust@lh@dim
 \newdimen\hust@lgap@dim
@@ -764,6 +934,9 @@
 \newsavebox\hust@logobox
 \newsavebox\hust@topbox
 \newsavebox\hust@botbox
+\newsavebox\hust@tmpbox
+\newsavebox\hust@logo@lC
+\newsavebox\hust@logo@lD
 
 
 \def\hust@chknewline#1\newline#2\relax{%
@@ -897,9 +1070,9 @@
       \fi
     \fi
   \fi
-  \begin{tikzpicture}[baseline={(shield.south)}]
-    \node[inner sep=0pt, outer sep=0pt, anchor=south west] (shield) at (0, 0)
-      {\includegraphics[height=\hust@lh@dim]{\hust@limg}};
+  \hbox{%
+    \hust@use@cachedimg{logo:\hust@limg:\the\hust@lh@dim}{height=\hust@lh@dim}{\hust@limg}%
+    \hskip\hust@lgap@dim%
     \if\relax\detokenize\expandafter{\hust@lunit}\relax
       %% ================================= Case 1 & 2: Bilingual (Hình 7)
       \def\hust@cmp@two{2}%
@@ -925,18 +1098,21 @@
           \else
             \expandafter\hust@parse@two@en\hust@len\newline\newline\relax
           \fi
-          \node[anchor=base west, inner sep=0pt]
-            at ([xshift=\hust@lgap@dim, yshift=-0.2556\hust@lh@dim] shield.north east)
-            {\scalebox{0.92}[1]{{\normalfont\hust@logofont\fontsize{0.18\hust@lh@dim}{0.18\hust@lh@dim}\selectfont\bfseries\color{\hust@lcol}\hust@vn@A}}};
-          \node[anchor=base west, inner sep=0pt]
-            at ([xshift=\hust@lgap@dim, yshift=-0.5140\hust@lh@dim] shield.north east)
-            {\scalebox{0.92}[1]{{\normalfont\hust@logofont\fontsize{0.18\hust@lh@dim}{0.18\hust@lh@dim}\selectfont\bfseries\color{\hust@lcol}\hust@vn@B}}};
-          \node[anchor=base west, inner sep=0pt]
-            at ([xshift=\hust@lgap@dim, yshift=-0.7277\hust@lh@dim] shield.north east)
-            {{\normalfont\hust@logofont\fontsize{0.137\hust@lh@dim}{0.137\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@en@A}};
-          \node[anchor=base west, inner sep=0pt]
-            at ([xshift=\hust@lgap@dim, yshift=-0.9344\hust@lh@dim] shield.north east)
-            {{\normalfont\hust@logofont\fontsize{0.137\hust@lh@dim}{0.137\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@en@B}};
+          \sbox\hust@topbox{\scalebox{0.92}[1]{{\normalfont\hust@logofont\fontsize{0.18\hust@lh@dim}{0.18\hust@lh@dim}\selectfont\bfseries\color{\hust@lcol}\hust@vn@A}}}%
+          \sbox\hust@botbox{\scalebox{0.92}[1]{{\normalfont\hust@logofont\fontsize{0.18\hust@lh@dim}{0.18\hust@lh@dim}\selectfont\bfseries\color{\hust@lcol}\hust@vn@B}}}%
+          \sbox\hust@logo@lC{{\normalfont\hust@logofont\fontsize{0.137\hust@lh@dim}{0.137\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@en@A}}%
+          \sbox\hust@logo@lD{{\normalfont\hust@logofont\fontsize{0.137\hust@lh@dim}{0.137\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@en@B}}%
+          \hust@rule@w=\wd\hust@topbox\relax
+          \ifdim\wd\hust@botbox>\hust@rule@w \hust@rule@w=\wd\hust@botbox\relax\fi
+          \ifdim\wd\hust@logo@lC>\hust@rule@w \hust@rule@w=\wd\hust@logo@lC\relax\fi
+          \ifdim\wd\hust@logo@lD>\hust@rule@w \hust@rule@w=\wd\hust@logo@lD\relax\fi
+          \hbox to \hust@rule@w{%
+            \rlap{\raise\dimexpr 0.7444\hust@lh@dim\relax\copy\hust@topbox}%
+            \rlap{\raise\dimexpr 0.4860\hust@lh@dim\relax\copy\hust@botbox}%
+            \rlap{\raise\dimexpr 0.2723\hust@lh@dim\relax\copy\hust@logo@lC}%
+            \rlap{\raise\dimexpr 0.0656\hust@lh@dim\relax\copy\hust@logo@lD}%
+            \hfil
+          }%
         \endgroup
       \else
         %% Horizontal 1: 1 line VN, 1 line EN (Hình 7, matches footer-full.png)
@@ -948,53 +1124,51 @@
         \ifx\hust@lequalwidth\hust@eqw@auto
           \ifx\hust@limg\hust@def@img\def\hust@do@eqw{1}\fi
         \fi
-        \node[inner sep=0pt, outer sep=0pt, anchor=west]
-          at ([xshift=\hust@lgap@dim] shield.east) {%
-            \vbox{%
-              \offinterlineskip%
-              \hbox{\usebox\hust@logobox}%
-              \vskip 0.08\hust@lh@dim%
-              \ifdefined\hust@do@eqw
-                \hbox{\resizebox{\wd\hust@logobox}{!}{{\normalfont\hust@logofont\fontsize{0.185\hust@lh@dim}{0.185\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@len}}}%
-              \else
-                \hbox{{\normalfont\hust@logofont\fontsize{0.155\hust@lh@dim}{0.155\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@len}}%
-              \fi
-            }%
-          };
+        \sbox\hust@tmpbox{%
+          \vbox{%
+            \offinterlineskip%
+            \hbox{\usebox\hust@logobox}%
+            \vskip 0.08\hust@lh@dim%
+            \ifdefined\hust@do@eqw
+              \hbox{\resizebox{\wd\hust@logobox}{!}{{\normalfont\hust@logofont\fontsize{0.185\hust@lh@dim}{0.185\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@len}}}%
+            \else
+              \hbox{{\normalfont\hust@logofont\fontsize{0.155\hust@lh@dim}{0.155\hust@lh@dim}\selectfont\mdseries\color{\hust@lcol}\hust@len}}%
+            \fi
+          }%
+        }%
+        \raise\dimexpr 0.5\hust@lh@dim - 0.5\ht\hust@tmpbox + 0.5\dp\hust@tmpbox\relax\hbox{\usebox\hust@tmpbox}%
       \fi
     \else
       %% ================================= Case 3 & 4: Member Unit (Hình 9)
       \ifdefined\hust@is@foura
         %% Case 4a: 2 lines VN + separator rule at center + 2 lines Unit (Symmetric)
-        \node[inner sep=0pt, outer sep=0pt, anchor=south west, align=left] (top)
-          at ([xshift=\hust@lgap@dim, yshift=0.04\hust@lh@dim] shield.east) {\usebox\hust@topbox};
-        \draw[\hust@llcol, line width=0.7pt]
-          ([xshift=\hust@lgap@dim] shield.east) -- ([xshift=\dimexpr\hust@lgap@dim + \hust@rule@w\relax] shield.east);
-        \node[inner sep=0pt, outer sep=0pt, anchor=north west, align=left] (bot)
-          at ([xshift=\hust@lgap@dim, yshift=-0.04\hust@lh@dim] shield.east) {\usebox\hust@botbox};
+        \hbox to \hust@rule@w{%
+          \rlap{\raise\dimexpr 0.54\hust@lh@dim + \dp\hust@topbox\relax\copy\hust@topbox}%
+          \rlap{\textcolor{\hust@llcol}{\raise\dimexpr 0.50\hust@lh@dim - 0.35pt\relax\hbox{\vrule width \hust@rule@w height 0.7pt depth 0pt}}}%
+          \rlap{\raise\dimexpr 0.46\hust@lh@dim - \ht\hust@botbox\relax\copy\hust@botbox}%
+          \hfil
+        }%
       \else
         \ifnum\hust@do@fourb=1
           %% Case 4b: 1 line VN + separator rule + 2 lines Unit (Cluster pushed up to center on shield)
-          \node[inner sep=0pt, outer sep=0pt, anchor=south west] (top)
-            at ([xshift=\hust@lgap@dim, yshift=0.16\hust@lh@dim] shield.east) {\usebox\hust@topbox};
-          \draw[\hust@llcol, line width=0.7pt]
-            ([xshift=\hust@lgap@dim, yshift=0.095\hust@lh@dim] shield.east) --
-            ([xshift=\dimexpr\hust@lgap@dim + \hust@rule@w\relax, yshift=0.095\hust@lh@dim] shield.east);
-          \node[inner sep=0pt, outer sep=0pt, anchor=north west, align=left] (bot)
-            at ([xshift=\hust@lgap@dim, yshift=0.035\hust@lh@dim] shield.east) {\usebox\hust@botbox};
+          \hbox to \hust@rule@w{%
+            \rlap{\raise\dimexpr 0.66\hust@lh@dim + \dp\hust@topbox\relax\copy\hust@topbox}%
+            \rlap{\textcolor{\hust@llcol}{\raise\dimexpr 0.595\hust@lh@dim - 0.35pt\relax\hbox{\vrule width \hust@rule@w height 0.7pt depth 0pt}}}%
+            \rlap{\raise\dimexpr 0.535\hust@lh@dim - \ht\hust@botbox\relax\copy\hust@botbox}%
+            \hfil
+          }%
         \else
           %% Case 3: 1 line VN + separator rule + 1 line Unit (Measured from official Hình 9a lockup)
-          \node[inner sep=0pt, outer sep=0pt, anchor=base west] (top)
-            at ([xshift=\hust@lgap@dim, yshift=0.167\hust@lh@dim] shield.east) {\usebox\hust@topbox};
-          \draw[\hust@llcol, line width=0.75pt]
-            ([xshift=\hust@lgap@dim, yshift=0.042\hust@lh@dim] shield.east) --
-            ([xshift=\dimexpr\hust@lgap@dim + \hust@rule@w\relax, yshift=0.042\hust@lh@dim] shield.east);
-          \node[inner sep=0pt, outer sep=0pt, anchor=base west] (bot)
-            at ([xshift=\hust@lgap@dim, yshift=-0.300\hust@lh@dim] shield.east) {\usebox\hust@botbox};
+          \hbox to \hust@rule@w{%
+            \rlap{\raise 0.667\hust@lh@dim\copy\hust@topbox}%
+            \rlap{\textcolor{\hust@llcol}{\raise\dimexpr 0.542\hust@lh@dim - 0.375pt\relax\hbox{\vrule width \hust@rule@w height 0.75pt depth 0pt}}}%
+            \rlap{\raise 0.200\hust@lh@dim\copy\hust@botbox}%
+            \hfil
+          }%
         \fi
       \fi
     \fi
-  \end{tikzpicture}%
+  }%
   \endgroup
 }
 
@@ -1023,7 +1197,7 @@
     #1%
   }%
   \hust@wm@h@dim=\hust@wm@h\relax
-  \sbox\hust@wm@imgbox{\includegraphics[height=\hust@wm@h@dim]{\hust@wm@img}}%
+  \sbox\hust@wm@imgbox{\hust@use@cachedimg{wm:\hust@wm@img:\the\hust@wm@h@dim}{height=\hust@wm@h@dim}{\hust@wm@img}}%
   \sbox\hust@wm@vnbox{{\hust@logofont\fontsize{0.25\hust@wm@h@dim}{0.25\hust@wm@h@dim}\selectfont\bfseries\color{\hust@wm@col}ĐẠI HỌC BÁCH KHOA HÀ NỘI}}%
   \sbox\hust@wm@enbox{{\hust@logofont\fontsize{0.14\hust@wm@h@dim}{0.14\hust@wm@h@dim}\selectfont\mdseries\color{\hust@wm@col}HANOI UNIVERSITY OF SCIENCE AND TECHNOLOGY}}%
   \vbox{%

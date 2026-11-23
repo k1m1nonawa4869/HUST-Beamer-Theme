@@ -53,20 +53,7 @@
   \let\hust@titlefamily\relax
 \fi
 
-%% Official brand typeface for slogan & lockups (never changes with document font)
-\IfFontExistsTF{TeX Gyre Adventor}{%
-  \newfontfamily\hust@brandfamily{TeX Gyre Adventor}[Ligatures=TeX]
-}{%
-  \IfFontExistsTF{AvantGarde}{%
-    \newfontfamily\hust@brandfamily{AvantGarde}[Ligatures=TeX]
-  }{%
-    \IfFontExistsTF{Arial}{%
-      \newfontfamily\hust@brandfamily{Arial}[Ligatures=TeX]
-    }{%
-      \let\hust@brandfamily\sffamily
-    }%
-  }%
-}
+%% Official brand typeface is defined once in hust-core.sty (\hust@brandfamily)
 
 %% Beamer font sizes and weights matching HUST brand guidelines & PPTX master
 \setbeamerfont{title}{family=\hust@titlefamily, series=\bfseries, size=\Large}
