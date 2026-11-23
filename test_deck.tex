@@ -39,8 +39,8 @@
 ]{HUST}
 
 %% ------------------------------------------------------------- Modular Academic & UX Setup
-%% Enable minted (uses frozen cache automatically once _minted/ exists -> ~4s faster builds)
-\IfFileExists{_minted/default.style.minted}{\def\hustmintedmode{frozen}}{\def\hustmintedmode{auto}}
+%% Enable minted (first pass caches _minted/; subsequent passes auto-use [frozencache] -> ~4s faster)
+\def\hustmintedmode{auto}
 \input{hust-setup}
 
 \usepackage[backend=biber,style=numeric,sorting=none,maxcitenames=2,mincitenames=1]{biblatex}
@@ -376,7 +376,7 @@ double clip_box(double x, double r) {
 \begin{frame}{Các tùy chọn của gói theme}{Tùy biến dễ dàng qua \texttt{\textbackslash usetheme} hoặc \texttt{\textbackslash hustsetup}}
   \scriptsize
   \centering
-  \begin{tabularx}{\textwidth}{>{\ttfamily\bfseries\color{hustmain}}r >{\small}X}
+  \begin{tabularx}{\textwidth}{>{\ttfamily\bfseries\color{hustmain}}r >{\small\raggedright\arraybackslash}X}
     color       & \texttt{blue} (mặc định) hoặc \texttt{red}. \\
     font        & \texttt{lato} (mặc định), \texttt{cm}, \texttt{times}, hoặc \texttt{arial}. \\
     titlefont   & \texttt{avantgarde} (mặc định theo sổ tay) hoặc \texttt{same}. \\
@@ -401,7 +401,7 @@ double clip_box(double x, double r) {
 \begin{frame}{Các kiểu khung hình và môi trường slide}{Danh mục khung hình chuyên dụng kèm tùy chọn đối số}
   \scriptsize
   \centering
-  \begin{tabularx}{\textwidth}{>{\ttfamily\bfseries\color{hustmain}}r >{\small}X}
+  \begin{tabularx}{\textwidth}{>{\ttfamily\bfseries\color{hustmain}}r >{\small\raggedright\arraybackslash}X}
     frame               & Khung cơ bản: \texttt{[t|c|b]}, \texttt{[plain]}, \texttt{[fragile]}, \texttt{[noframenumbering]}, \texttt{[noprogressbar]}. \\
     hustwelcomeframe    & Khung mở đầu / chào mừng: \texttt{[bg=dark|background|cover]}, \texttt{[footer=true|false]}. \\
     hustdarkframe       & Khung nền màu đậm nhận diện thương hiệu (slide kết luận, Q\&A). \\

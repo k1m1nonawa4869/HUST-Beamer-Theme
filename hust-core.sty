@@ -194,6 +194,14 @@
 \newif\ifhust@dateaddress
 \hust@dateaddresstrue
 \def\hust@date@address{Hà Nội}
+\newif\ifhust@lang@en
+\hust@lang@enfalse
+\newif\ifhust@toctitle@set
+\hust@toctitle@setfalse
+\newif\ifhust@reftitle@set
+\hust@reftitle@setfalse
+\newif\ifhust@address@set
+\hust@address@setfalse
 \newif\ifhust@footermeta
 \hust@footermetafalse
 \def\hust@footer@author{}
@@ -507,7 +515,7 @@
   wordmark/true/.code={\def\hust@wordmark{on}},
   wordmark/off/.code={\def\hust@wordmark{off}},
   wordmark/false/.code={\def\hust@wordmark{off}},
-  toctitle/.code={\def\husttoctitle{#1}},
+  toctitle/.code={\hust@toctitle@settrue\def\husttoctitle{#1}},
   tocsubtitle/.code={%
     \def\hust@tmp{#1}%
     \ifdefstring{\hust@tmp}{Hidden}{\def\husttocsubtitle{}}{%
@@ -518,7 +526,7 @@
       }%
     }%
   },
-  reftitle/.code={\def\hustreftitle{#1}},
+  reftitle/.code={\hust@reftitle@settrue\def\hustreftitle{#1}},
   refsubtitle/.code={%
     \def\hust@tmp{#1}%
     \ifdefstring{\hust@tmp}{Hidden}{\def\hustrefsubtitle{}}{%
@@ -610,9 +618,10 @@
   dateaddress/none/.code={\hust@dateaddressfalse},
   address/.code={%
     \def\hust@tmp{#1}%
-    \ifdefstring{\hust@tmp}{none}{\hust@dateaddressfalse}{%
-      \ifdefstring{\hust@tmp}{off}{\hust@dateaddressfalse}{%
-        \ifdefstring{\hust@tmp}{false}{\hust@dateaddressfalse}{%
+    \ifdefstring{\hust@tmp}{none}{\hust@address@settrue\hust@dateaddressfalse}{%
+      \ifdefstring{\hust@tmp}{off}{\hust@address@settrue\hust@dateaddressfalse}{%
+        \ifdefstring{\hust@tmp}{false}{\hust@address@settrue\hust@dateaddressfalse}{%
+          \hust@address@settrue
           \hust@dateaddresstrue
           \def\hust@date@address{#1}%
         }%
@@ -621,9 +630,10 @@
   },
   location/.code={%
     \def\hust@tmp{#1}%
-    \ifdefstring{\hust@tmp}{none}{\hust@dateaddressfalse}{%
-      \ifdefstring{\hust@tmp}{off}{\hust@dateaddressfalse}{%
-        \ifdefstring{\hust@tmp}{false}{\hust@dateaddressfalse}{%
+    \ifdefstring{\hust@tmp}{none}{\hust@address@settrue\hust@dateaddressfalse}{%
+      \ifdefstring{\hust@tmp}{off}{\hust@address@settrue\hust@dateaddressfalse}{%
+        \ifdefstring{\hust@tmp}{false}{\hust@address@settrue\hust@dateaddressfalse}{%
+          \hust@address@settrue
           \hust@dateaddresstrue
           \def\hust@date@address{#1}%
         }%
@@ -632,9 +642,10 @@
   },
   datecity/.code={%
     \def\hust@tmp{#1}%
-    \ifdefstring{\hust@tmp}{none}{\hust@dateaddressfalse}{%
-      \ifdefstring{\hust@tmp}{off}{\hust@dateaddressfalse}{%
-        \ifdefstring{\hust@tmp}{false}{\hust@dateaddressfalse}{%
+    \ifdefstring{\hust@tmp}{none}{\hust@address@settrue\hust@dateaddressfalse}{%
+      \ifdefstring{\hust@tmp}{off}{\hust@address@settrue\hust@dateaddressfalse}{%
+        \ifdefstring{\hust@tmp}{false}{\hust@address@settrue\hust@dateaddressfalse}{%
+          \hust@address@settrue
           \hust@dateaddresstrue
           \def\hust@date@address{#1}%
         }%
@@ -742,12 +753,32 @@
   fast/off/.code={\hust@fastfalse},
   fast/false/.code={\hust@fastfalse},
   fast/.default=on,
+  lang/.is choice,
+  lang/vi/.code={%
+    \hust@lang@enfalse
+    \ifhust@toctitle@set\else\def\husttoctitle{Nội dung chính}\fi
+    \ifhust@reftitle@set\else\def\hustreftitle{Tài liệu tham khảo}\fi
+    \ifhust@address@set\else\def\hust@date@address{Hà Nội}\fi
+  },
+  lang/vn/.code={\pgfkeys{/hust/lang=vi}},
+  lang/vietnamese/.code={\pgfkeys{/hust/lang=vi}},
+  lang/en/.code={%
+    \hust@lang@entrue
+    \ifhust@toctitle@set\else\def\husttoctitle{Outline}\fi
+    \ifhust@reftitle@set\else\def\hustreftitle{References}\fi
+    \ifhust@address@set\else\def\hust@date@address{Hanoi}\fi
+  },
+  lang/english/.code={\pgfkeys{/hust/lang=en}},
 }
 %% defaults = the look of the PPTX template & Brand Guidebook (Avant Garde titles, Lato body)
 \pgfkeys{/hust/.cd, color=blue, font=lato, titlefont=avantgarde, footerlogo=full,
   bar=thin, titlepage=cover, coverbg=cover, sectionpage=none, numbering=plain, slogan=on,
   wordmark=on, panelsocial=on, logomode=vector, logolayout=2,
-  logo2sep=none, logo2layout=1, progressbar=off, dateaddress=on, address={Hà Nội}}
+  logo2sep=none, logo2layout=1, progressbar=off, dateaddress=on, address={Hà Nội}, lang=vi}
+%% Allow user options (e.g. lang=en) to switch default titles/address unless explicitly overridden
+\hust@toctitle@setfalse
+\hust@reftitle@setfalse
+\hust@address@setfalse
 
 %% \hustsetup{...} may be used anywhere in the preamble after \usetheme{HUST}
 \newcommand*\hustsetup[1]{\pgfkeys{/hust/.cd,#1}}
@@ -768,27 +799,42 @@
   \fi
 }
 
-%% ------------------------------------------------------------ Vietnamese Date Format
+%% ------------------------------------------------------------ Date Format (vi | en)
+\newcommand{\hust@en@month}[1]{%
+  \ifcase#1\or January\or February\or March\or April\or May\or June%
+  \or July\or August\or September\or October\or November\or December\fi
+}
 \newcommand{\hust@set@today}{%
   \def\today{%
-    \ifhust@dateaddress
-      \ifx\hust@date@address\@empty
-        ngày \number\day\ tháng \number\month\ năm \number\year
+    \ifhust@lang@en
+      \ifhust@dateaddress
+        \ifx\hust@date@address\@empty
+          \hust@en@month{\month}\ \number\day, \number\year
+        \else
+          \hust@date@address, \hust@en@month{\month}\ \number\day, \number\year
+        \fi
       \else
-        \hust@date@address, ngày \number\day\ tháng \number\month\ năm \number\year
+        \hust@en@month{\month}\ \number\day, \number\year
       \fi
     \else
-      ngày \number\day\ tháng \number\month\ năm \number\year
+      \ifhust@dateaddress
+        \ifx\hust@date@address\@empty
+          ngày \number\day\ tháng \number\month\ năm \number\year
+        \else
+          \hust@date@address, ngày \number\day\ tháng \number\month\ năm \number\year
+        \fi
+      \else
+        ngày \number\day\ tháng \number\month\ năm \number\year
+      \fi
     \fi
   }%
 }
 \hust@set@today
 \AtBeginDocument{\hust@set@today}
 
-%% Helper to output an arbitrary Vietnamese date with optional custom address:
-%%   \hustdate{8}{7}{2025} -> "Hà Nội, ngày 8 tháng 7 năm 2025" (when address is on)
-%%   \hustdate[TP. Hồ Chí Minh]{8}{7}{2025} -> "TP. Hồ Chí Minh, ngày 8 tháng 7 năm 2025"
-%%   \hustdate[none]{8}{7}{2025} -> "ngày 8 tháng 7 năm 2025"
+%% Helper to output an arbitrary date with optional custom address:
+%%   lang=vi: \hustdate{8}{7}{2025} -> "Hà Nội, ngày 8 tháng 7 năm 2025"
+%%   lang=en: \hustdate{8}{7}{2025} -> "Hanoi, July 8, 2025"
 \newcommand{\hustdate}[4][]{%
   \gdef\hust@recorded@shortdate{\ifnum#2<10 0\fi\number#2/\ifnum#3<10 0\fi\number#3/\number#4}%
   \begingroup
@@ -802,19 +848,24 @@
         }%
       }%
     }%
+    \ifhust@lang@en
+      \def\hust@dbody{\hust@en@month{#3}\ \number#2, #4}%
+    \else
+      \def\hust@dbody{ngày #2 tháng #3 năm #4}%
+    \fi
     \ifhust@dateaddress
       \ifx\hust@tmp@addr\@empty
-        ngày #2 tháng #3 năm #4%
+        \hust@dbody
       \else
-        \hust@tmp@addr, ngày #2 tháng #3 năm #4%
+        \hust@tmp@addr, \hust@dbody
       \fi
     \else
       \ifstrempty{#1}{%
-        ngày #2 tháng #3 năm #4%
+        \hust@dbody
       }{%
-        \ifstrequal{#1}{none}{ngày #2 tháng #3 năm #4}{%
-          \ifstrequal{#1}{off}{ngày #2 tháng #3 năm #4}{%
-            #1, ngày #2 tháng #3 năm #4%
+        \ifstrequal{#1}{none}{\hust@dbody}{%
+          \ifstrequal{#1}{off}{\hust@dbody}{%
+            #1, \hust@dbody
           }%
         }%
       }%
