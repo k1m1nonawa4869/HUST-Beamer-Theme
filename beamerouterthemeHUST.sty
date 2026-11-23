@@ -231,9 +231,13 @@
 \def\hust@hdr@pagenumber{pagenumber}
 \def\hust@hdr@logo{logo}
 \newsavebox\hust@hdr@rightbox
+\newsavebox\hust@hdr@tmpbox
+\newsavebox\hust@hdr@logocache
+\def\hust@hdr@logokey{}
 \newdimen\hust@cur@bandH
 \newdimen\hust@cur@headerB
 \newdimen\hust@title@avail@w
+\newdimen\hust@hdr@accentH
 
 \newcommand{\hust@eval@header@dims}{%
   \def\hust@bar@thick{thick}%
@@ -259,14 +263,19 @@
     \fi
   \else\ifx\hust@headerright\hust@hdr@logo
     \ifx\hust@headerlogo\@empty\else
-      \sbox\hust@hdr@rightbox{%
-        \begingroup
-          \setlength{\fboxsep}{1.4pt}%
-          \colorbox{white}{%
-            \includegraphics[height=\dimexpr\hust@cur@bandH - 8.0pt\relax,keepaspectratio]{\hust@headerlogo}%
-          }%
-        \endgroup
-      }%
+      \edef\hust@want@logokey{\hust@headerlogo:\the\hust@cur@bandH}%
+      \ifx\hust@want@logokey\hust@hdr@logokey\else
+        \global\setbox\hust@hdr@logocache=\hbox{%
+          \begingroup
+            \setlength{\fboxsep}{1.4pt}%
+            \colorbox{white}{%
+              \hust@use@cachedimg{hdrlogo:\hust@want@logokey}{height=\dimexpr\hust@cur@bandH - 8.0pt\relax,keepaspectratio}{\hust@headerlogo}%
+            }%
+          \endgroup
+        }%
+        \global\let\hust@hdr@logokey\hust@want@logokey
+      \fi
+      \sbox\hust@hdr@rightbox{\copy\hust@hdr@logocache}%
     \fi
   \fi\fi
   \ifdim\wd\hust@hdr@rightbox>0pt\relax
@@ -280,47 +289,52 @@
   \leavevmode%
   \hust@eval@progh
   \hust@eval@header@dims
-  \begin{tikzpicture}[remember picture, overlay]
+  \setbox\hust@hdr@tmpbox=\hbox to 0pt{%
     %% Optional diagonal rounded-diamond texture from HUST Brand Guidebook Page 1 (compact bottom-right accent)
     \ifx\hust@framebg\hust@opt@on
-      \hust@resolve@diagimg
-      \def\hust@cur@framebgh{%
-        \ifx\hust@framebg@height\hust@val@auto
-          \ifhust@wide 0.26\paperheight\else 0.24\paperheight\fi
-        \else
-          \hust@framebg@height
-        \fi
-      }%
-      \node[inner sep=0pt, outer sep=0pt, anchor=south east, opacity=\hust@framebg@opacity]
-        at ([xshift=0pt, yshift=-\dimexpr\hust@fH{footY} - 1.5pt\relax] current page.north east) {%
-          \includegraphics[height=\hust@cur@framebgh,keepaspectratio]{\hust@diag@img}%
-        };
+      \ifhust@fast\else
+        \hust@resolve@diagimg
+        \def\hust@cur@framebgh{%
+          \ifx\hust@framebg@height\hust@val@auto
+            \ifhust@wide 0.26\paperheight\else 0.24\paperheight\fi
+          \else
+            \hust@framebg@height
+          \fi
+        }%
+        \sbox\z@{\hust@use@cachedopacityimg{diag:\hust@diag@img:\the\dimexpr\hust@cur@framebgh\relax:\hust@framebg@opacity}{\hust@framebg@opacity}{height=\hust@cur@framebgh,keepaspectratio}{\hust@diag@img}}%
+        \rlap{%
+          \kern\dimexpr\paperwidth - \wd\z@\relax
+          \raise\dimexpr -\hust@fH{footY} + 1.5pt + \dp\z@\relax\box\z@
+        }%
+      \fi
     \fi
     %% Progress bar at the top (if enabled and current frame allows)
     \ifdim\hust@cur@progh>0pt\relax
-      \node[anchor=north west, inner sep=0pt, outer sep=0pt] at (current page.north west) {\hust@render@progressbar};
+      \rlap{\raise -\hust@cur@progh\hbox{\hust@render@progressbar}}%
     \fi
     %% Main coloured header band and accent bar (pushed down by \hust@cur@progh)
     \def\hust@bar@thick{thick}%
     \ifx\hust@bar\hust@bar@thick
-      \fill[hustmain] ([yshift=-\hust@cur@progh] current page.north west) rectangle
-        ([yshift=-\dimexpr\hust@fH{bandB} + \hust@cur@progh\relax] current page.north east);
-      \fill[hustaccent] ([yshift=-\dimexpr\hust@fH{bandB} + \hust@cur@progh\relax] current page.north west) rectangle
-        ([yshift=-\dimexpr\hust@fH{thickB} + \hust@cur@progh\relax] current page.north east);
+      \setlength{\hust@hdr@accentH}{\dimexpr\hust@fH{thickB} - \hust@fH{bandB}\relax}%
+      \rlap{\raise -\dimexpr\hust@fH{bandB} + \hust@cur@progh\relax\hbox{\textcolor{hustmain}{\vrule width \paperwidth height \hust@fH{bandB} depth 0pt}}}%
+      \rlap{\raise -\dimexpr\hust@fH{thickB} + \hust@cur@progh\relax\hbox{\textcolor{hustaccent}{\vrule width \paperwidth height \hust@hdr@accentH depth 0pt}}}%
     \else
-      \fill[hustmain] ([yshift=-\hust@cur@progh] current page.north west) rectangle
-        ([yshift=-\dimexpr\hust@fH{bandThinB} + \hust@cur@progh\relax] current page.north east);
-      \fill[hustaccent] ([yshift=-\dimexpr\hust@fH{ruleT} + \hust@cur@progh\relax] current page.north west) rectangle
-        ([yshift=-\dimexpr\hust@fH{thinB} + \hust@cur@progh\relax] current page.north east);
+      \setlength{\hust@hdr@accentH}{\dimexpr\hust@fH{thinB} - \hust@fH{ruleT}\relax}%
+      \rlap{\raise -\dimexpr\hust@fH{bandThinB} + \hust@cur@progh\relax\hbox{\textcolor{hustmain}{\vrule width \paperwidth height \hust@fH{bandThinB} depth 0pt}}}%
+      \rlap{\raise -\dimexpr\hust@fH{thinB} + \hust@cur@progh\relax\hbox{\textcolor{hustaccent}{\vrule width \paperwidth height \hust@hdr@accentH depth 0pt}}}%
     \fi
     %% Right side of frametitle bar: yellow page number or white-bordered logo
     \ifdim\wd\hust@hdr@rightbox>0pt\relax
-      \node[anchor=east, inner sep=0pt, outer sep=0pt]
-        at ([xshift=-\hust@fW{mL}, yshift=\dimexpr -\hust@cur@progh - \hust@cur@bandH/2\relax] current page.north east) {%
-          \usebox\hust@hdr@rightbox
-        };
+      \rlap{%
+        \kern\dimexpr\paperwidth - \hust@fW{mL} - \wd\hust@hdr@rightbox\relax
+        \raise\dimexpr -\hust@cur@progh - \hust@cur@bandH/2 - 0.5\ht\hust@hdr@rightbox + 0.5\dp\hust@hdr@rightbox\relax\box\hust@hdr@rightbox
+      }%
     \fi
-  \end{tikzpicture}%
+    \hss
+  }%
+  \ht\hust@hdr@tmpbox=0pt\relax
+  \dp\hust@hdr@tmpbox=0pt\relax
+  \box\hust@hdr@tmpbox
 }
 
 \newcommand{\hust@check@hassub}{%
@@ -346,47 +360,45 @@
   \hust@eval@progh
   \hust@eval@header@dims
   \hust@check@hassub
+  \setbox\hust@hdr@tmpbox=\hbox to 0pt{%
+    \def\hust@bar@thick{thick}%
+    \ifx\hust@bar\hust@bar@thick
+      %% THICK BAR MODE: Subtitle moves into the thick accent bar with white text
+      \sbox\z@{\parbox{\hust@title@avail@w}{\usebeamerfont{frametitle}\color{white}\raggedright\strut\husttruncateto{\hust@title@avail@w}{\usebeamerfont{frametitle}}{\insertframetitle}\strut}}%
+      \rlap{\raise\dimexpr -\hust@cur@progh - \hust@fH{bandB}/2 - 0.5\ht\z@ + 0.5\dp\z@\relax\box\z@}%
+      \ifnum\hust@hassub=1\relax
+        \sbox\z@{\parbox{\dimexpr\paperwidth - 2\hust@fW{mL}\relax}{\usebeamerfont{framesubtitle}\color{HUSTWhite}\spaceskip=0.8\fontdimen2\font\raggedright\strut\husttruncateto{\dimexpr\paperwidth - 2\hust@fW{mL}\relax}{\usebeamerfont{framesubtitle}}{\insertframesubtitle}\strut}}%
+        \rlap{\raise\dimexpr -\hust@cur@progh - (\hust@fH{bandB} + \hust@fH{thickB})/2 - 0.5\ht\z@ + 0.5\dp\z@\relax\box\z@}%
+      \fi
+    \else
+      %% THIN BAR MODE: Standard layout
+      \ifnum\hust@hassub=0\relax
+        %% Single-line title: mathematically centered in the colored header band
+        \sbox\z@{\parbox{\hust@title@avail@w}{\usebeamerfont{frametitle}\color{white}\raggedright\strut\husttruncateto{\hust@title@avail@w}{\usebeamerfont{frametitle}}{\insertframetitle}\strut}}%
+        \rlap{\raise\dimexpr -\hust@cur@progh - \hust@fH{bandThinB}/2 - 0.5\ht\z@ + 0.5\dp\z@\relax\box\z@}%
+      \else
+        %% Title + Subtitle: vertically centered as a 2-line block inside the colored header band
+        \sbox\z@{%
+          \parbox{\hust@title@avail@w}{%
+            {\usebeamerfont{frametitle}\color{white}\raggedright\strut\husttruncateto{\hust@title@avail@w}{\usebeamerfont{frametitle}}{\insertframetitle}\strut\par}%
+            \nointerlineskip\vskip 1.5pt%
+            {\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\spaceskip=0.8\fontdimen2\font\raggedright\strut\husttruncateto{\hust@title@avail@w}{\usebeamerfont{framesubtitle}}{\insertframesubtitle}\strut\par}%
+          }%
+        }%
+        \rlap{\raise\dimexpr -\hust@cur@progh - \hust@fH{bandThinB}/2 - 0.5\ht\z@ + 0.5\dp\z@\relax\box\z@}%
+      \fi
+    \fi
+    \hss
+  }%
+  \ht\hust@hdr@tmpbox=0pt\relax
+  \dp\hust@hdr@tmpbox=0pt\relax
+  \noindent\box\hust@hdr@tmpbox%
   \def\hust@bar@thick{thick}%
   \ifx\hust@bar\hust@bar@thick
     \vskip\dimexpr\hust@fH{thickB} + \hust@cur@progh + 0.3em\relax%
   \else
     \vskip\dimexpr\hust@fH{thinB} + \hust@cur@progh + 0.4em\relax%
   \fi
-  \begin{tikzpicture}[remember picture, overlay]
-    \def\hust@bar@thick{thick}%
-    \ifx\hust@bar\hust@bar@thick
-      %% THICK BAR MODE: Subtitle moves into the thick accent bar with white text
-      \node[anchor=west, inner sep=0pt, outer sep=0pt]
-        at ([xshift=\hust@fW{mL}, yshift=\dimexpr -\hust@cur@progh - \hust@fH{bandB}/2\relax] current page.north west) {%
-          \parbox{\hust@title@avail@w}{\usebeamerfont{frametitle}\color{white}\raggedright\strut\husttruncateto{\hust@title@avail@w}{\usebeamerfont{frametitle}}{\insertframetitle}\strut}%
-        };
-      \ifnum\hust@hassub=1\relax
-        \node[anchor=west, inner sep=0pt, outer sep=0pt]
-          at ([xshift=\hust@fW{mL}, yshift=\dimexpr -\hust@cur@progh - (\hust@fH{bandB} + \hust@fH{thickB})/2\relax] current page.north west) {%
-            \parbox{\dimexpr\paperwidth - 2\hust@fW{mL}\relax}{\usebeamerfont{framesubtitle}\color{HUSTWhite}\spaceskip=0.8\fontdimen2\font\raggedright\strut\husttruncateto{\dimexpr\paperwidth - 2\hust@fW{mL}\relax}{\usebeamerfont{framesubtitle}}{\insertframesubtitle}\strut}%
-          };
-      \fi
-    \else
-      %% THIN BAR MODE: Standard layout
-      \ifnum\hust@hassub=0\relax
-        %% Single-line title: mathematically centered in the colored header band
-        \node[anchor=west, inner sep=0pt, outer sep=0pt]
-          at ([xshift=\hust@fW{mL}, yshift=\dimexpr -\hust@cur@progh - \hust@fH{bandThinB}/2\relax] current page.north west) {%
-            \parbox{\hust@title@avail@w}{\usebeamerfont{frametitle}\color{white}\raggedright\strut\husttruncateto{\hust@title@avail@w}{\usebeamerfont{frametitle}}{\insertframetitle}\strut}%
-          };
-      \else
-        %% Title + Subtitle: vertically centered as a 2-line block inside the colored header band
-        \node[anchor=west, inner sep=0pt, outer sep=0pt]
-          at ([xshift=\hust@fW{mL}, yshift=\dimexpr -\hust@cur@progh - \hust@fH{bandThinB}/2\relax] current page.north west) {%
-            \parbox{\hust@title@avail@w}{%
-              {\usebeamerfont{frametitle}\color{white}\raggedright\strut\husttruncateto{\hust@title@avail@w}{\usebeamerfont{frametitle}}{\insertframetitle}\strut\par}%
-              \nointerlineskip\vskip 1.5pt%
-              {\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\spaceskip=0.8\fontdimen2\font\raggedright\strut\husttruncateto{\hust@title@avail@w}{\usebeamerfont{framesubtitle}}{\insertframesubtitle}\strut\par}%
-            }%
-          };
-      \fi
-    \fi
-  \end{tikzpicture}%
 }
 
 %% ----------------------------------------------------------- Footer / Footline
@@ -400,47 +412,51 @@
 \def\hust@num@plain{plain}
 \def\hust@num@fraction{fraction}
 
+\newsavebox\hust@foot@authbox
+\newsavebox\hust@foot@datebox
+\newsavebox\hust@foot@numbox
+\newsavebox\hust@foot@titlebox
+\newdimen\hust@foot@ruleL
+\newdimen\hust@foot@ruleW
+\newdimen\hust@foot@dateL
+\newdimen\hust@foot@authR
+\newdimen\hust@foot@ruley
+\newdimen\hust@foot@titley
+
 \defbeamertemplate*{footline}{HUST}{%
   \leavevmode%
-  \begin{tikzpicture}[remember picture, overlay]
-    %% Calculate logo file, width, and gap
-    \def\hust@fimg{}%
-    \def\hust@lw{0pt}%
-    \def\hust@lgap{0pt}%
-    \ifx\hust@flogo\hust@logo@full
-      \def\hust@fimg{footer-full.png}%
-      \def\hust@lw{\hust@fW{fullW}}%
-      \def\hust@lgap{\hust@fW{gapfull}}%
-    \else\ifx\hust@flogo\hust@logo@mark
-      \def\hust@fimg{footer-mark.png}%
-      \def\hust@lw{\hust@fW{markW}}%
-      \def\hust@lgap{\hust@fW{gapmark}}%
-    \else\ifx\hust@flogo\hust@logo@wordmark
-      \def\hust@fimg{footer-wordmark.png}%
-      \def\hust@lw{\hust@fW{wordmarkW}}%
-      \def\hust@lgap{\hust@fW{gapwordmark}}%
-    \else\ifx\hust@flogo\hust@logo@hust
-      \def\hust@fimg{footer-hust.png}%
-      \def\hust@lw{\hust@fW{hustW}}%
-      \def\hust@lgap{\hust@fW{gaphust}}%
-    \fi\fi\fi\fi
-
+  %% Calculate logo file, width, and gap
+  \def\hust@fimg{}%
+  \def\hust@lw{0pt}%
+  \def\hust@lgap{0pt}%
+  \ifx\hust@flogo\hust@logo@full
+    \def\hust@fimg{footer-full.png}%
+    \def\hust@lw{\hust@fW{fullW}}%
+    \def\hust@lgap{\hust@fW{gapfull}}%
+  \else\ifx\hust@flogo\hust@logo@mark
+    \def\hust@fimg{footer-mark.png}%
+    \def\hust@lw{\hust@fW{markW}}%
+    \def\hust@lgap{\hust@fW{gapmark}}%
+  \else\ifx\hust@flogo\hust@logo@wordmark
+    \def\hust@fimg{footer-wordmark.png}%
+    \def\hust@lw{\hust@fW{wordmarkW}}%
+    \def\hust@lgap{\hust@fW{gapwordmark}}%
+  \else\ifx\hust@flogo\hust@logo@hust
+    \def\hust@fimg{footer-hust.png}%
+    \def\hust@lw{\hust@fW{hustW}}%
+    \def\hust@lgap{\hust@fW{gaphust}}%
+  \fi\fi\fi\fi
+  \setlength{\hust@foot@ruleL}{\dimexpr\hust@fW{footX} + \hust@lw + \hust@lgap\relax}%
+  \setlength{\hust@foot@ruleW}{\dimexpr\hust@fW{footXend} - \hust@foot@ruleL\relax}%
+  \setbox\hust@hdr@tmpbox=\hbox to \paperwidth{%
     %% Place footer logo at bottom left (centred vertically on footY)
     \ifx\hust@fimg\@empty\else
-      \node[inner sep=0pt, outer sep=0pt, anchor=west]
-        at ([xshift=\hust@fW{footX}, yshift=-\hust@fH{footY}] current page.north west) {%
-        \includegraphics[width=\hust@lw]{\hust@fimg}%
-      };
+      \sbox\z@{\hust@use@cachedimg{flogo:\hust@fimg:\the\dimexpr\hust@lw\relax}{width=\hust@lw}{\hust@fimg}}%
+      \rlap{\kern\hust@fW{footX}\raise\dimexpr\paperheight - \hust@fH{footY} - 0.5\ht\z@ + 0.5\dp\z@\relax\box\z@}%
     \fi
-
     %% Dynamic footer bar & citations placement:
-    %% If 0 citations: original bar at footY, and \hust@footertext above bar (if set).
-    %% If 1 citation: original bar at footY, and citation placed UNDER the bar.
-    %% If 2+ citations: citations textbox pulled close to bottom edge (numY),
-    %%                  and footer bar redrawn directly ABOVE the citations textbox.
     \ifnum\c@hust@slide@citecount=0\relax
       \ifhust@footermeta
-        %% Check whether slide page number is rendered in the footer or moved to the header bar
         \def\hust@show@footnum{1}%
         \ifx\hust@numbering\hust@num@none
           \def\hust@show@footnum{0}%
@@ -448,16 +464,11 @@
         \ifx\hust@headerright\hust@hdr@pagenumber
           \def\hust@show@footnum{0}%
         \fi
+        \sbox\hust@foot@datebox{{\usebeamerfont{footermeta}\color{hustmain}\strut\hust@cur@footerdate}}%
         \ifnum\hust@show@footnum=0\relax
-          %% Page number moved to header (or disabled): Date is right-aligned at footXend with wider spacing
-          \node[anchor=south east, inner sep=0pt, outer sep=0pt] (hustdate)
-            at ([xshift=\hust@fW{footXend}, yshift=-\hust@fH{numY}] current page.north west) {%
-            {\usebeamerfont{footermeta}\color{hustmain}\strut\hust@cur@footerdate}%
-          };
+          \setlength{\hust@foot@dateL}{\dimexpr\hust@fW{footXend} - \wd\hust@foot@datebox\relax}%
         \else
-          %% 1. Slide numbering (right aligned at numR)
-          \node[anchor=south east, inner sep=0pt, outer sep=0pt] (hustpagenum)
-            at ([xshift=\hust@fW{numR}, yshift=-\hust@fH{numY}] current page.north west) {%
+          \sbox\hust@foot@numbox{%
             {\usebeamerfont{page number in head/foot}\color{hustmain}\strut%
               \ifx\hust@numbering\hust@num@fraction
                 \insertframenumber\,/\,\inserttotalframenumber
@@ -465,46 +476,51 @@
                 \insertframenumber
               \fi
             }%
-          };
-          %% 2. Date: to the left of page number
-          \node[anchor=south east, inner sep=0pt, outer sep=0pt] (hustdate)
-            at ([xshift=-1.5em] hustpagenum.south west) {%
-            {\usebeamerfont{footermeta}\color{hustmain}\strut\hust@cur@footerdate}%
-          };
+          }%
+          \setlength{\hust@foot@dateL}{\dimexpr\hust@fW{numR} - \wd\hust@foot@numbox - 1.5em - \wd\hust@foot@datebox\relax}%
+          \rlap{%
+            \kern\dimexpr\hust@fW{numR} - \wd\hust@foot@numbox\relax
+            \raise\dimexpr\paperheight - \hust@fH{numY} + \dp\hust@foot@numbox\relax\box\hust@foot@numbox
+          }%
         \fi
-        %% 3. Author: bottom left after logo
-        \node[anchor=south west, inner sep=0pt, outer sep=0pt] (hustauthor)
-          at ([xshift=\dimexpr\hust@fW{footX} + \hust@lw + \hust@lgap\relax, yshift=-\hust@fH{numY}] current page.north west) {%
-          {\usebeamerfont{footermeta}\color{hustmain}\strut\hust@cur@footerauthor}%
-        };
-        %% 4. Title: between author and date, multi-line if needed, anchored to bottom
-        \path let \p1 = (hustauthor.south east),
-                  \p2 = (hustdate.south west),
-                  \n1 = {\x2 - \x1 - 2.0em} in
-          node[anchor=south, inner sep=0pt, outer sep=0pt] (husttitle) at ({(\x1+\x2)/2}, \y1) {%
-            \parbox[b]{\n1}{%
-              \centering\usebeamerfont{footermeta}\color{hustmain}\strut%
-              \hust@cur@footertitle\strut
-            }%
-          };
-        %% 5. Accent rule: stays at footY if 1 line, or lifts up if title has multiple lines
-        \path let \p1 = ([yshift=3.5pt] husttitle.north),
-                  \p2 = ([yshift=-\hust@fH{footY}] current page.north west),
-                  \n2 = {max(\y1, \y2)} in
-          coordinate (actualRuleY) at (0pt, \n2);
-        \draw[hustaccent, line width=\hust@fH{footLineH}]
-          ([xshift=\dimexpr\hust@fW{footX} + \hust@lw + \hust@lgap\relax] current page.north west |- actualRuleY) --
-          ([xshift=\hust@fW{footXend}] current page.north west |- actualRuleY);
-      \fi
-      \ifhust@footermeta\else
-        \draw[hustaccent, line width=\hust@fH{footLineH}]
-          ([xshift=\dimexpr\hust@fW{footX} + \hust@lw + \hust@lgap\relax, yshift=-\hust@fH{footY}] current page.north west) --
-          ([xshift=\hust@fW{footXend}, yshift=-\hust@fH{footY}] current page.north west);
+        \rlap{%
+          \kern\hust@foot@dateL
+          \raise\dimexpr\paperheight - \hust@fH{numY} + \dp\hust@foot@datebox\relax\box\hust@foot@datebox
+        }%
+        \sbox\hust@foot@authbox{{\usebeamerfont{footermeta}\color{hustmain}\strut\hust@cur@footerauthor}}%
+        \setlength{\hust@foot@authR}{\dimexpr\hust@foot@ruleL + \wd\hust@foot@authbox\relax}%
+        \rlap{%
+          \kern\hust@foot@ruleL
+          \raise\dimexpr\paperheight - \hust@fH{numY} + \dp\hust@foot@authbox\relax\box\hust@foot@authbox
+        }%
+        \sbox\hust@foot@titlebox{%
+          \parbox[b]{\dimexpr\hust@foot@dateL - \hust@foot@authR - 2.0em\relax}{%
+            \centering\usebeamerfont{footermeta}\color{hustmain}\strut%
+            \hust@cur@footertitle\strut
+          }%
+        }%
+        \rlap{%
+          \kern\dimexpr(\hust@foot@authR + \hust@foot@dateL - \wd\hust@foot@titlebox) / 2\relax
+          \raise\dimexpr\paperheight - \hust@fH{numY} + \dp\hust@foot@titlebox\relax\copy\hust@foot@titlebox
+        }%
+        %% Accent rule: stays at footY if 1 line, or lifts up if title has multiple lines
+        \setlength{\hust@foot@titley}{\dimexpr\paperheight - \hust@fH{numY} + \ht\hust@foot@titlebox + \dp\hust@foot@titlebox + 3.5pt\relax}%
+        \setlength{\hust@foot@ruley}{\dimexpr\paperheight - \hust@fH{footY}\relax}%
+        \ifdim\hust@foot@titley>\hust@foot@ruley
+          \setlength{\hust@foot@ruley}{\hust@foot@titley}%
+        \fi
+        \rlap{%
+          \kern\hust@foot@ruleL
+          \raise\dimexpr\hust@foot@ruley - 0.5\hust@fH{footLineH}\relax\hbox{\textcolor{hustaccent}{\vrule width \hust@foot@ruleW height \hust@fH{footLineH} depth 0pt}}%
+        }%
+      \else
+        \rlap{%
+          \kern\hust@foot@ruleL
+          \raise\dimexpr\paperheight - \hust@fH{footY} - 0.5\hust@fH{footLineH}\relax\hbox{\textcolor{hustaccent}{\vrule width \hust@foot@ruleW height \hust@fH{footLineH} depth 0pt}}%
+        }%
         \ifx\hust@footertext\@empty\else
-          \node[anchor=south west, inner sep=0pt, outer sep=0pt]
-            at ([xshift=\dimexpr\hust@fW{footX} + \hust@lw + \hust@lgap\relax, yshift=\dimexpr-\hust@fH{footY} + 2pt\relax] current page.north west) {%
-            {\usebeamerfont{footer}\color{hustblack}\hust@footertext}%
-          };
+          \sbox\z@{{\usebeamerfont{footer}\color{hustblack}\hust@footertext}}%
+          \rlap{\kern\hust@foot@ruleL\raise\dimexpr\paperheight - \hust@fH{footY} + 2pt + \dp\z@\relax\box\z@}%
         \fi
       \fi
     \fi
@@ -512,45 +528,37 @@
       \hust@build@slide@citebox
     \fi
     \ifnum\hust@cite@rows=1\relax
-      \draw[hustaccent, line width=\hust@fH{footLineH}]
-        ([xshift=\dimexpr\hust@fW{footX} + \hust@lw + \hust@lgap\relax, yshift=-\hust@fH{footY}] current page.north west) --
-        ([xshift=\hust@fW{footXend}, yshift=-\hust@fH{footY}] current page.north west);
-      \node[anchor=north west, inner sep=0pt, outer sep=0pt]
-        at ([xshift=\dimexpr\hust@fW{footX} + \hust@lw + \hust@lgap\relax, yshift=\dimexpr-\hust@fH{footY} - 2pt\relax] current page.north west) {%
-          \copy\hust@slide@citebox
-        };
+      \rlap{%
+        \kern\hust@foot@ruleL
+        \raise\dimexpr\paperheight - \hust@fH{footY} - 0.5\hust@fH{footLineH}\relax\hbox{\textcolor{hustaccent}{\vrule width \hust@foot@ruleW height \hust@fH{footLineH} depth 0pt}}%
+      }%
+      \rlap{%
+        \kern\hust@foot@ruleL
+        \raise\dimexpr\paperheight - \hust@fH{footY} - 2pt - \ht\hust@slide@citebox\relax\copy\hust@slide@citebox
+      }%
     \fi
     \ifnum\hust@cite@rows>1\relax
-      \node[anchor=south west, inner sep=0pt, outer sep=0pt] (hustcites)
-        at ([xshift=\dimexpr\hust@fW{footX} + \hust@lw + \hust@lgap\relax, yshift=-\hust@fH{numY}] current page.north west) {%
-          \copy\hust@slide@citebox
-        };
-      \coordinate (citeruleL) at ([yshift=3pt] hustcites.north west);
-      \draw[hustaccent, line width=\hust@fH{footLineH}]
-        (citeruleL) -- ([xshift=\hust@fW{footXend}] current page.north west |- citeruleL);
+      \rlap{%
+        \kern\hust@foot@ruleL
+        \raise\dimexpr\paperheight - \hust@fH{numY} + \dp\hust@slide@citebox\relax\copy\hust@slide@citebox
+      }%
+      \setlength{\hust@foot@ruley}{\dimexpr\paperheight - \hust@fH{numY} + \ht\hust@slide@citebox + \dp\hust@slide@citebox + 3pt\relax}%
+      \rlap{%
+        \kern\hust@foot@ruleL
+        \raise\dimexpr\hust@foot@ruley - 0.5\hust@fH{footLineH}\relax\hbox{\textcolor{hustaccent}{\vrule width \hust@foot@ruleW height \hust@fH{footLineH} depth 0pt}}%
+      }%
     \fi
-
-    %% Slide numbering (right aligned at numR) - drawn here when footermeta is off or when cites are active, unless moved to header
+    %% Slide numbering (right aligned at numR) when footermeta is off or cites active, unless moved to header
     \ifx\hust@headerright\hust@hdr@pagenumber\else
+      \def\hust@draw@fnum{0}%
       \ifhust@footermeta
-        \ifnum\c@hust@slide@citecount>0\relax
-          \ifx\hust@numbering\hust@num@none\else
-            \node[anchor=east, inner sep=0pt, outer sep=0pt]
-              at ([xshift=\hust@fW{numR}, yshift=-\hust@fH{numY}] current page.north west) {%
-              {\usebeamerfont{page number in head/foot}\color{hustmain}%
-                \ifx\hust@numbering\hust@num@fraction
-                  \insertframenumber\,/\,\inserttotalframenumber
-                \else
-                  \insertframenumber
-                \fi
-              }%
-            };
-          \fi
-        \fi
+        \ifnum\c@hust@slide@citecount>0\relax \def\hust@draw@fnum{1}\fi
       \else
+        \def\hust@draw@fnum{1}%
+      \fi
+      \ifnum\hust@draw@fnum=1\relax
         \ifx\hust@numbering\hust@num@none\else
-          \node[anchor=east, inner sep=0pt, outer sep=0pt]
-            at ([xshift=\hust@fW{numR}, yshift=-\hust@fH{numY}] current page.north west) {%
+          \sbox\hust@foot@numbox{%
             {\usebeamerfont{page number in head/foot}\color{hustmain}%
               \ifx\hust@numbering\hust@num@fraction
                 \insertframenumber\,/\,\inserttotalframenumber
@@ -558,12 +566,19 @@
                 \insertframenumber
               \fi
             }%
-          };
+          }%
+          \rlap{%
+            \kern\dimexpr\hust@fW{numR} - \wd\hust@foot@numbox\relax
+            \raise\dimexpr\paperheight - \hust@fH{numY} - 0.5\ht\hust@foot@numbox + 0.5\dp\hust@foot@numbox\relax\box\hust@foot@numbox
+          }%
         \fi
       \fi
     \fi
-  \end{tikzpicture}%
-  \vskip\dimexpr\paperheight - \hust@fH{bodyBot}\relax%
+    \hfil
+  }%
+  \ht\hust@hdr@tmpbox=0pt\relax
+  \dp\hust@hdr@tmpbox=0pt\relax
+  \vbox to \dimexpr\paperheight - \hust@fH{bodyBot}\relax{\offinterlineskip\vss\noindent\box\hust@hdr@tmpbox}%
   \global\setbox\hust@slide@citebox=\box\voidb@x%
   \global\c@hust@slide@citecount=0\relax%
   \gdef\hust@cite@rows{0}%
@@ -774,6 +789,7 @@
   \hust@add@raw@footeritem{hustaccent}{\alph{hustnotecnt}}{#2}%
 }
 \let\beamer@orig@note\note
+\let\speakernote\beamer@orig@note
 \let\note\hustnote
 
 %% ------------------------------------------------ Convenience full-slide backgrounds
@@ -793,11 +809,11 @@
   \def\hust@wf@bg@dark{dark}%
   \ifx\hust@wf@bg\hust@wf@bg@dark
     \usebackgroundtemplate{%
-      \includegraphics[width=\paperwidth,height=\paperheight]{bg-dark-\hust@colname-\ifhust@wide 169\else 43\fi.png}%
+      \hust@use@cachedimg{bgdark:\hust@colname:\ifhust@wide 169\else 43\fi}{width=\paperwidth,height=\paperheight}{bg-dark-\hust@colname-\ifhust@wide 169\else 43\fi.png}%
     }%
   \else
     \usebackgroundtemplate{%
-      \includegraphics[width=\paperwidth,height=\paperheight]{bg-background-\hust@colname-\ifhust@wide 169\else 43\fi.png}%
+      \hust@use@cachedimg{bgbg:\hust@colname:\ifhust@wide 169\else 43\fi}{width=\paperwidth,height=\paperheight}{bg-background-\hust@colname-\ifhust@wide 169\else 43\fi.png}%
     }%
   \fi
 }
@@ -806,7 +822,7 @@
   \setbeamertemplate{headline}{}%
   \setbeamertemplate{footline}{}%
   \usebackgroundtemplate{%
-    \includegraphics[width=\paperwidth,height=\paperheight]{bg-dark-\hust@colname-\ifhust@wide 169\else 43\fi.png}%
+    \hust@use@cachedimg{bgdark:\hust@colname:\ifhust@wide 169\else 43\fi}{width=\paperwidth,height=\paperheight}{bg-dark-\hust@colname-\ifhust@wide 169\else 43\fi.png}%
   }%
 }
 

@@ -178,6 +178,8 @@
 \def\hustrefsubtitle{}
 \newif\ifhust@sec@showpanel
 \hust@sec@showpaneltrue
+\newif\ifhust@fast
+\hust@fastfalse
 \def\hust@logounit{}
 \def\hust@logovn{ĐẠI HỌC BÁCH KHOA HÀ NỘI}
 \def\hust@logoen{HANOI UNIVERSITY OF SCIENCE AND TECHNOLOGY}
@@ -668,6 +670,12 @@
   diagbgheight/.store in=\hust@framebg@height,
   textureheight/.store in=\hust@framebg@height,
   coverlightopacity/.store in=\hust@coverlight@opacity,
+  fast/.is choice,
+  fast/on/.code={\hust@fasttrue},
+  fast/true/.code={\hust@fasttrue},
+  fast/off/.code={\hust@fastfalse},
+  fast/false/.code={\hust@fastfalse},
+  fast/.default=on,
 }
 %% defaults = the look of the PPTX template & Brand Guidebook (Avant Garde titles, Lato body)
 \pgfkeys{/hust/.cd, color=blue, font=lato, titlefont=avantgarde, footerlogo=full,

@@ -219,12 +219,12 @@
 %% ------------------------------------------------------------- Table of Contents
 \defbeamertemplate*{section in toc}{HUST}{%
   \leavevmode%
-  \begin{tikzpicture}[baseline={(box.center)}]
-    \node[inner sep=0pt, minimum size=1.35em, fill=hustmain, text=white, font=\bfseries\small, anchor=center] (box) at (0, 0)
-      {\hfil\inserttocsectionnumber\hfil};
-    \node[anchor=west, inner sep=0pt, text width=\dimexpr\linewidth - 2.5em\relax, align=left] at ([xshift=0.6em] box.east)
-      {\usebeamerfont{section in toc}\color{hustmain}\inserttocsection};
-  \end{tikzpicture}\par\vskip 0.7em%
+  \setbox\hust@tmpbox=\hbox{\colorbox{hustmain}{\makebox[1.35em]{\color{white}\bfseries\small\strut\inserttocsectionnumber\strut}}}%
+  \edef\hust@toc@txtw{\the\dimexpr\linewidth - \wd\hust@tmpbox - 0.8em\relax}%
+  \raise\dimexpr 0.5ex - 0.5\ht\hust@tmpbox + 0.5\dp\hust@tmpbox\relax\box\hust@tmpbox%
+  \hskip 0.6em%
+  \parbox[c]{\hust@toc@txtw}{\raggedright\usebeamerfont{section in toc}\color{hustmain}\inserttocsection}%
+  \par\vskip 0.7em%
 }
 
 \defbeamertemplate*{subsection in toc}{HUST}{%
@@ -304,21 +304,23 @@
 \defbeamertemplate*{section page}{HUST}[1][]{%
   \begin{tikzpicture}[remember picture, overlay]
     \node[inner sep=0pt, outer sep=0pt, anchor=center] at (current page.center) {%
-      \includegraphics[width=\paperwidth,height=\paperheight]{bg-panel-\hust@colname-\ifhust@wide 169\else 43\fi\ifx\hust@panelsocial\hust@opt@off -clean\fi.png}%
+      \hust@use@cachedimg{panel:\hust@colname:\ifhust@wide 169\else 43\fi\ifx\hust@panelsocial\hust@opt@off -clean\fi}{width=\paperwidth,height=\paperheight}{bg-panel-\hust@colname-\ifhust@wide 169\else 43\fi\ifx\hust@panelsocial\hust@opt@off -clean\fi.png}%
     };
     \ifx\hust@framebg\hust@opt@on
-      \hust@resolve@diagimg
-      \def\hust@cur@framebgh{%
-        \ifx\hust@framebg@height\hust@val@auto
-          \ifhust@wide 0.28\paperheight\else 0.26\paperheight\fi
-        \else
-          \hust@framebg@height
-        \fi
-      }%
-      \node[inner sep=0pt, outer sep=0pt, anchor=south east, opacity=\hust@framebg@opacity]
-        at ([xshift=0pt, yshift=0pt] current page.south east) {%
-          \includegraphics[height=\hust@cur@framebgh,keepaspectratio]{\hust@diag@img}%
-        };
+      \ifhust@fast\else
+        \hust@resolve@diagimg
+        \def\hust@cur@framebgh{%
+          \ifx\hust@framebg@height\hust@val@auto
+            \ifhust@wide 0.28\paperheight\else 0.26\paperheight\fi
+          \else
+            \hust@framebg@height
+          \fi
+        }%
+        \node[inner sep=0pt, outer sep=0pt, anchor=south east]
+          at ([xshift=0pt, yshift=0pt] current page.south east) {%
+            \hust@use@cachedopacityimg{paneldiag:\hust@diag@img:\the\dimexpr\hust@cur@framebgh\relax:\hust@framebg@opacity}{\hust@framebg@opacity}{height=\hust@cur@framebgh,keepaspectratio}{\hust@diag@img}%
+          };
+      \fi
     \fi
     \node[anchor=west, text width=0.56\paperwidth, align=left]
       at ([xshift=0.38\paperwidth, yshift=0pt] current page.west) {%
