@@ -14,8 +14,124 @@
 \setbeamertemplate{enumerate item}{\small\bfseries\insertenumlabel.}
 \setbeamertemplate{enumerate subitem}{\footnotesize\bfseries\insertenumlabel.\insertsubenumlabel}
 
-%% ------------------------------------------------------------- Blocks
-\setbeamertemplate{blocks}[rounded][shadow=false]
+%% ------------------------------------------------------------- Blocks (Solid Header + Translucent Body)
+\def\hust@boxesrounded@start#1#2#3{%
+  \global\let\beamer@firstlineitemizeunskip=\relax%
+  \vbox\bgroup%
+  \edef\hust@blk@upper{#1}%
+  \edef\hust@blk@lower{#2}%
+  \edef\hust@blk@width{\textwidth}%
+  {%
+    \usebeamercolor{\hust@blk@lower}%
+    \globalcolorstrue%
+    \colorlet{hustblklower}{bg}%
+  }%
+  {%
+    \usebeamercolor{\hust@blk@upper}%
+    \globalcolorstrue%
+    \colorlet{hustblkupper}{bg}%
+  }%
+  \vskip4bp%
+  \setbox\bmb@box=\hbox{%
+    \begin{minipage}[b]{\hust@blk@width}%
+      \usebeamercolor[fg]{\hust@blk@upper}%
+      #3%
+    \end{minipage}}%
+  \ifdim\wd\bmb@box=0pt%
+    \def\hust@blk@hashead{0}%
+    \setbox\bmb@box=\hbox{}%
+    \ht\bmb@box=1.5pt%
+  \else%
+    \def\hust@blk@hashead{1}%
+    \wd\bmb@box=\hust@blk@width%
+    \bmb@temp=\dp\bmb@box%
+    \ifdim\bmb@temp<2.0pt\bmb@temp=2.0pt\fi%
+    \setbox\bmb@box=\hbox{\raise\bmb@temp\hbox{\box\bmb@box}}%
+    \dp\bmb@box=0pt%
+  \fi%
+  \bmb@temp=\hust@blk@width%
+  \bmb@dima=\bmb@temp\advance\bmb@dima by2.2bp%
+  \bmb@dimb=\bmb@temp\advance\bmb@dimb by4bp%
+  \ifnum\hust@blk@hashead=1\relax
+    \hbox{%
+      \begin{pgfpicture}{0bp}{+-\ht\bmb@box}{0bp}{+-\ht\bmb@box}%
+        \color{hustblkupper}%
+        \pgfsetfillopacity{1}%
+        \pgfpathqmoveto{-4bp}{-1bp}%
+        \pgfpathqcurveto{-4bp}{1.2bp}{-2.2bp}{3bp}{0bp}{3bp}%
+        \pgfpathlineto{\pgfpoint{\bmb@temp}{3bp}}%
+        \pgfpathcurveto{\pgfpoint{\bmb@dima}{3bp}}{\pgfpoint{\bmb@dimb}{1.2bp}}{\pgfpoint{\bmb@dimb}{-1bp}}%
+        \bmb@dima=-\ht\bmb@box%
+        \pgfpathlineto{\pgfpoint{\bmb@dimb}{\bmb@dima}}%
+        \pgfpathlineto{\pgfpoint{-4bp}{\bmb@dima}}%
+        \pgfusepath{fill}%
+      \end{pgfpicture}%
+      \copy\bmb@box%
+    }%
+    \nointerlineskip%
+  \fi
+  \setbox\bmb@box=\hbox\bgroup\begin{minipage}[b]{\hust@blk@width}%
+    \vskip3pt%
+    \usebeamercolor[fg]{\hust@blk@lower}%
+    \colorlet{beamerstructure}{hustblkupper}%
+    \colorlet{structure}{hustblkupper}%
+}
+\def\hust@boxesrounded@end{%
+  \end{minipage}\egroup%
+  \bmb@temp=\dp\bmb@box%
+  \advance\bmb@temp by1.5pt%
+  \setbox\bmb@box=\hbox{\raise\bmb@temp\hbox{\box\bmb@box}}%
+  \dp\bmb@box=0pt%
+  \bmb@temp=\hust@blk@width%
+  \bmb@dima=\bmb@temp\advance\bmb@dima by2.2bp%
+  \bmb@dimb=\bmb@temp\advance\bmb@dimb by4bp%
+  \hbox{%
+    \begin{pgfpicture}{0bp}{0bp}{0bp}{0bp}%
+      \color{hustblklower}%
+      \pgfsetfillopacity{\hust@block@opacity}%
+      \pgfpathqmoveto{-4bp}{1bp}%
+      \pgfpathqcurveto{-4bp}{-1.2bp}{-2.2bp}{-3bp}{0bp}{-3bp}%
+      \pgfpathlineto{\pgfpoint{\the\bmb@temp}{-3bp}}%
+      \pgfpathcurveto{\pgfpoint{\the\bmb@dima}{-3bp}}{\pgfpoint{\the\bmb@dimb}{-1.2bp}}{\pgfpoint{\the\bmb@dimb}{1bp}}%
+      \bmb@boxheight=\ht\bmb@box%
+      \ifnum\hust@blk@hashead=0\relax
+        \advance\bmb@boxheight by-1bp%
+        \pgfpathlineto{\pgfpoint{\the\bmb@dimb}{\bmb@boxheight}}%
+        \pgfpathcurveto{\pgfpoint{\the\bmb@dimb}{\dimexpr\bmb@boxheight+2.2bp\relax}}{\pgfpoint{\the\bmb@dima}{\dimexpr\bmb@boxheight+4bp\relax}}{\pgfpoint{\the\bmb@temp}{\dimexpr\bmb@boxheight+4bp\relax}}%
+        \pgfpathlineto{\pgfpoint{0bp}{\dimexpr\bmb@boxheight+4bp\relax}}%
+        \pgfpathcurveto{\pgfpoint{-2.2bp}{\dimexpr\bmb@boxheight+4bp\relax}}{\pgfpoint{-4bp}{\dimexpr\bmb@boxheight+2.2bp\relax}}{\pgfpoint{-4bp}{\bmb@boxheight}}%
+      \else
+        \pgfpathlineto{\pgfpoint{\the\bmb@dimb}{\bmb@boxheight}}%
+        \pgfpathlineto{\pgfpoint{-4bp}{\bmb@boxheight}}%
+      \fi
+      \pgfusepath{fill}%
+    \end{pgfpicture}%
+    \box\bmb@box%
+  }%
+  \vskip2bp%
+  \egroup%
+}
+
+\defbeamertemplate*{block begin}{HUST}{%
+  \par\vskip\medskipamount%
+  \hust@boxesrounded@start{block title}{block body}{\raggedright\usebeamerfont*{block title}\insertblocktitle}%
+  \raggedright\usebeamerfont{block body}%
+}
+\defbeamertemplate*{block end}{HUST}{\hust@boxesrounded@end\vskip\smallskipamount}
+
+\defbeamertemplate*{block alerted begin}{HUST}{%
+  \par\vskip\medskipamount%
+  \hust@boxesrounded@start{block title alerted}{block body alerted}{\raggedright\usebeamerfont*{block title alerted}\insertblocktitle}%
+  \raggedright\usebeamerfont{block body alerted}%
+}
+\defbeamertemplate*{block alerted end}{HUST}{\hust@boxesrounded@end\vskip\smallskipamount}
+
+\defbeamertemplate*{block example begin}{HUST}{%
+  \par\vskip\medskipamount%
+  \hust@boxesrounded@start{block title example}{block body example}{\raggedright\usebeamerfont*{block title example}\insertblocktitle}%
+  \raggedright\usebeamerfont{block body example}%
+}
+\defbeamertemplate*{block example end}{HUST}{\hust@boxesrounded@end\vskip\smallskipamount}
 
 %% ------------------------------------------------------------- Title Page
 \def\hust@titlepage@cover{cover}

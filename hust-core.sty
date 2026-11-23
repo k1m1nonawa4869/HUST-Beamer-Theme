@@ -79,13 +79,11 @@
   \fi
 }
 \newcommand{\hust@use@cachedopacityimg}[4]{%
-  \begingroup
-    \pgfsys@beginscope
+  \begin{pgfpicture}%
     \pgfsetfillopacity{#2}%
     \pgfsetstrokeopacity{#2}%
-    \hust@use@cachedimg{#1}{#3}{#4}%
-    \pgfsys@endscope
-  \endgroup
+    \pgftext[base,left]{\hust@use@cachedimg{#1}{#3}{#4}}%
+  \end{pgfpicture}%
 }
 
 %% Prevent hyperref PDF-string Unicode warnings on \\, \newline, \hustdate in \title/\author/\date
@@ -217,6 +215,7 @@
 \def\hust@framebg@height{auto}
 \def\hust@val@auto{auto}
 \def\hust@coverlight@opacity{0.18}
+\def\hust@block@opacity{0.85}
 
 %% UTF-8 safe word-boundary string truncation for footer citations & notes
 \ifdefined\directlua
@@ -740,6 +739,7 @@
   diagbgheight/.store in=\hust@framebg@height,
   textureheight/.store in=\hust@framebg@height,
   coverlightopacity/.store in=\hust@coverlight@opacity,
+  blockopacity/.store in=\hust@block@opacity,
   fast/.is choice,
   fast/on/.code={\hust@fasttrue},
   fast/true/.code={\hust@fasttrue},
