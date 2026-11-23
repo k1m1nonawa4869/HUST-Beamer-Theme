@@ -175,6 +175,7 @@
 \def\hust@logovn{ĐẠI HỌC BÁCH KHOA HÀ NỘI}
 \def\hust@logoen{HANOI UNIVERSITY OF SCIENCE AND TECHNOLOGY}
 \def\hust@logomode{vector}
+\def\hust@logolang{auto}
 \def\hust@logolayout{2}
 \def\hust@logotwoimage{}
 \def\hust@logotwovn{KHOA TOÁN - TIN}
@@ -542,6 +543,11 @@
   logomode/.is choice,
   logomode/vector/.code={\def\hust@logomode{vector}},
   logomode/image/.code={\def\hust@logomode{image}},
+  logolang/.is choice,
+  logolang/auto/.code={\def\hust@logolang{auto}},
+  logolang/vi/.code={\def\hust@logolang{vi}},
+  logolang/en/.code={\def\hust@logolang{en}},
+  logolang/bilingual/.code={\def\hust@logolang{bilingual}},
   logolayout/.is choice,
   logolayout/1/.code={\def\hust@logolayout{1}},
   logolayout/2/.code={\def\hust@logolayout{2}},
@@ -932,6 +938,32 @@
 \newsavebox\hust@logo@lD
 
 
+%% Normalize LaTeX2e package-option expanded "\protect\newline " into "\newline"
+\begingroup
+\def\hust@defnorm#1{%
+  \gdef\hust@strip@pnl##1\protect#1##2\hust@pnl@end{%
+    \if\relax\detokenize{##2}\relax
+      \def\hust@lunit{##1}%
+    \else
+      \def\hust@lunit{##1\newline}%
+      \hust@strip@pnl@more##2\hust@pnl@end
+    \fi
+  }%
+  \gdef\hust@strip@pnl@more##1\protect#1##2\hust@pnl@end{%
+    \if\relax\detokenize{##2}\relax
+      \expandafter\def\expandafter\hust@lunit\expandafter{\hust@lunit##1}%
+    \else
+      \expandafter\def\expandafter\hust@lunit\expandafter{\hust@lunit##1\newline}%
+      \hust@strip@pnl@more##2\hust@pnl@end
+    \fi
+  }%
+  \gdef\hust@norm@lunit{%
+    \expandafter\hust@strip@pnl\hust@lunit\protect#1\hust@pnl@end
+  }%
+}
+\expandafter\hust@defnorm\expandafter{\csname newline \endcsname}
+\endgroup
+
 \def\hust@chknewline#1\newline#2\relax{%
   \if\relax\detokenize{#2}\relax
     \def\hust@unit@multiline{0}%
@@ -970,8 +1002,10 @@
   \fi
 }
 
+\newif\ifhust@lvn@explicit
 \newcommand{\hustlogo}[1][]{%
   \begingroup%
+  \hust@lvn@explicitfalse
   \def\hust@lh{1.0cm}%
   \def\hust@lgap{0.333\hust@lh@dim}%
   \def\hust@limg{hust-shield.png}%
@@ -979,6 +1013,7 @@
   \def\hust@lvn{ĐẠI HỌC BÁCH KHOA HÀ NỘI}%
   \def\hust@len{HANOI UNIVERSITY OF SCIENCE AND TECHNOLOGY}%
   \def\hust@llayout{1}%
+  \def\hust@llang{\hust@logolang}%
   \def\hust@lcol{hustblack}%
   \def\hust@lucol{hustcrimson}%
   \def\hust@llcol{hustgrayline}%
@@ -988,9 +1023,14 @@
     gap/.store in=\hust@lgap,
     image/.store in=\hust@limg,
     unit/.store in=\hust@lunit,
-    vn/.store in=\hust@lvn,
+    vn/.code={\hust@lvn@explicittrue\def\hust@lvn{##1}},
     en/.store in=\hust@len,
     layout/.store in=\hust@llayout,
+    lang/.is choice,
+    lang/auto/.code={\def\hust@llang{auto}},
+    lang/vi/.code={\def\hust@llang{vi}},
+    lang/en/.code={\def\hust@llang{en}},
+    lang/bilingual/.code={\def\hust@llang{bilingual}},
     color/.store in=\hust@lcol,
     unitcolor/.store in=\hust@lucol,
     linecolor/.store in=\hust@llcol,
@@ -1003,12 +1043,22 @@
     #1%
   }%
   \edef\hust@llayout{\hust@llayout}%
+  \edef\hust@llang{\hust@llang}%
+  \def\hust@ll@auto{auto}%
+  \ifx\hust@llang\hust@ll@auto
+    \ifhust@lang@en\def\hust@eff@llang{en}\else\def\hust@eff@llang{vi}\fi
+  \else
+    \edef\hust@eff@llang{\hust@llang}%
+  \fi
+  \def\hust@ll@en{en}%
+  \def\hust@cmp@shield{hust-shield.png}%
   \edef\hust@limg{\hust@limg}%
   \edef\hust@lcol{\hust@lcol}%
   \edef\hust@lucol{\hust@lucol}%
   \edef\hust@llcol{\hust@llcol}%
   \edef\hust@lequalwidth{\hust@lequalwidth}%
-  \expandafter\def\expandafter\hust@lunit\expandafter{\hust@lunit}%
+  \protected@edef\hust@lunit{\hust@lunit}%
+  \hust@norm@lunit
   \expandafter\def\expandafter\hust@lvn\expandafter{\hust@lvn}%
   \expandafter\def\expandafter\hust@len\expandafter{\hust@len}%
   \hust@lh@dim=\hust@lh\relax
@@ -1017,6 +1067,11 @@
     \sbox\hust@logobox{\scalebox{0.93}[1]{{\normalfont\hust@logofont\fontsize{0.255\hust@lh@dim}{0.255\hust@lh@dim}\selectfont\bfseries\color{\hust@lcol}\hust@lvn}}}%
   \else
     %% Pre-build Member Unit boxes outside tikzpicture so \nullfont does not suppress \sbox
+    \ifx\hust@eff@llang\hust@ll@en
+      \ifhust@lvn@explicit\else
+        \def\hust@lvn{HANOI UNIVERSITY OF SCIENCE AND TECHNOLOGY}%
+      \fi
+    \fi
     \expandafter\hust@chknewline\hust@lunit\newline\relax
     \def\hust@cmp@two{2}%
     \def\hust@cmp@twolines{2lines}%
@@ -1029,10 +1084,15 @@
       \ifx\hust@llayout\hust@cmp@twolines\def\hust@is@foura{1}\fi
     \fi
     \ifdefined\hust@is@foura
-      %% Case 4a: 2 lines VN + separator rule at center + 2 lines Unit (Symmetric)
+      %% Case 4a: 2 lines VN/EN + separator rule at center + 2 lines Unit (Symmetric)
       \def\hust@def@vn{ĐẠI HỌC BÁCH KHOA HÀ NỘI}%
       \ifx\hust@lvn\hust@def@vn
         \def\hust@lvn{ĐẠI HỌC\newline BÁCH KHOA HÀ NỘI}%
+      \else
+        \def\hust@def@enuniv{HANOI UNIVERSITY OF SCIENCE AND TECHNOLOGY}%
+        \ifx\hust@lvn\hust@def@enuniv
+          \def\hust@lvn{HANOI UNIVERSITY\newline OF SCIENCE AND TECHNOLOGY}%
+        \fi
       \fi
       \sbox\hust@topbox{\vbox{\offinterlineskip\expandafter\hust@render@vn@sub\hust@lvn\newline\relax}}%
       \sbox\hust@botbox{\vbox{\offinterlineskip\expandafter\hust@render@unit@sub\hust@lunit\newline\relax}}%
@@ -1048,15 +1108,25 @@
           \def\hust@do@fourb{0}%
         \fi
       \fi
+      \ifx\hust@eff@llang\hust@ll@en
+        %% Guidebook Fig. 10 (English University Name + English Unit): compact top proportion
+        \def\hust@top@fs{0.142\hust@lh@dim}%
+      \else
+        \ifnum\hust@do@fourb=1
+          \def\hust@top@fs{0.205\hust@lh@dim}%
+        \else
+          \def\hust@top@fs{0.215\hust@lh@dim}%
+        \fi
+      \fi
       \ifnum\hust@do@fourb=1
-        %% Case 4b: 1 line VN + separator rule + 2 lines Unit
-        \sbox\hust@topbox{\scalebox{0.92}[1]{{\normalfont\hust@logofont\fontsize{0.205\hust@lh@dim}{0.205\hust@lh@dim}\selectfont\bfseries\color{\hust@lcol}\hust@lvn}}}%
+        %% Case 4b: 1 line University + separator rule + 2 lines Unit
+        \sbox\hust@topbox{\scalebox{0.92}[1]{{\normalfont\hust@logofont\fontsize{\hust@top@fs}{\hust@top@fs}\selectfont\bfseries\color{\hust@lcol}\hust@lvn}}}%
         \sbox\hust@botbox{\vbox{\offinterlineskip\expandafter\hust@render@unit\hust@lunit\newline\relax}}%
         \hust@rule@w=\wd\hust@topbox\relax
         \ifdim\wd\hust@botbox>\hust@rule@w \hust@rule@w=\wd\hust@botbox\relax\fi
       \else
-        %% Case 3: 1 line VN + separator rule + 1 line Unit (Measured from official Hình 9a lockup)
-        \sbox\hust@topbox{\scalebox{0.92}[1]{{\normalfont\hust@logofont\fontsize{0.215\hust@lh@dim}{0.215\hust@lh@dim}\selectfont\bfseries\color{\hust@lcol}\hust@lvn}}}%
+        %% Case 3: 1 line University + separator rule + 1 line Unit (Guidebook Fig. 9 / Fig. 10)
+        \sbox\hust@topbox{\scalebox{0.92}[1]{{\normalfont\hust@logofont\fontsize{\hust@top@fs}{\hust@top@fs}\selectfont\bfseries\color{\hust@lcol}\hust@lvn}}}%
         \sbox\hust@botbox{\scalebox{0.85}[1]{{\normalfont\hust@logofont\fontsize{0.262\hust@lh@dim}{0.262\hust@lh@dim}\selectfont\bfseries\color{\hust@lucol}\hust@lunit}}}%
         \hust@rule@w=\wd\hust@topbox\relax
         \ifdim\wd\hust@botbox>\hust@rule@w \hust@rule@w=\wd\hust@botbox\relax\fi
@@ -1067,13 +1137,43 @@
     \hust@use@cachedimg{logo:\hust@limg:\the\hust@lh@dim}{height=\hust@lh@dim}{\hust@limg}%
     \hskip\hust@lgap@dim%
     \if\relax\detokenize\expandafter{\hust@lunit}\relax
-      %% ================================= Case 1 & 2: Bilingual (Hình 7)
-      \def\hust@cmp@two{2}%
-      \def\hust@cmp@twolines{2lines}%
-      \let\hust@is@laytwo\undefined
-      \ifx\hust@llayout\hust@cmp@two\def\hust@is@laytwo{1}\fi
-      \ifx\hust@llayout\hust@cmp@twolines\def\hust@is@laytwo{1}\fi
-      \ifdefined\hust@is@laytwo
+      %% ================================= Case 1 & 2: Bilingual (Hình 7) or English-only (Hình 8b)
+      \let\hust@do@enonly\undefined
+      \ifx\hust@eff@llang\hust@ll@en
+        \ifx\hust@limg\hust@cmp@shield
+          \ifhust@lvn@explicit\else
+            \def\hust@do@enonly{1}%
+          \fi
+        \fi
+      \fi
+      \ifdefined\hust@do@enonly
+        %% Guidebook Fig. 8b: Shield + 2-line HANOI UNIVERSITY / OF SCIENCE AND TECHNOLOGY
+        \begingroup
+          \let\\\newline
+          \def\hust@def@en{HANOI UNIVERSITY OF SCIENCE AND TECHNOLOGY}%
+          \ifx\hust@len\hust@def@en
+            \def\hust@en@A{HANOI UNIVERSITY}%
+            \def\hust@en@B{OF SCIENCE AND TECHNOLOGY}%
+          \else
+            \expandafter\hust@parse@two@en\hust@len\newline\newline\relax
+          \fi
+          \sbox\hust@tmpbox{%
+            \vbox{%
+              \offinterlineskip%
+              \hbox{\scalebox{0.93}[1]{{\normalfont\hust@logofont\fontsize{0.215\hust@lh@dim}{0.215\hust@lh@dim}\selectfont\bfseries\color{\hust@lcol}\hust@en@A}}}%
+              \vskip 0.065\hust@lh@dim%
+              \hbox{\scalebox{0.93}[1]{{\normalfont\hust@logofont\fontsize{0.215\hust@lh@dim}{0.215\hust@lh@dim}\selectfont\bfseries\color{\hust@lcol}\hust@en@B}}}%
+            }%
+          }%
+          \raise\dimexpr 0.5\hust@lh@dim - 0.5\ht\hust@tmpbox + 0.5\dp\hust@tmpbox\relax\hbox{\usebox\hust@tmpbox}%
+        \endgroup
+      \else
+        \def\hust@cmp@two{2}%
+        \def\hust@cmp@twolines{2lines}%
+        \let\hust@is@laytwo\undefined
+        \ifx\hust@llayout\hust@cmp@two\def\hust@is@laytwo{1}\fi
+        \ifx\hust@llayout\hust@cmp@twolines\def\hust@is@laytwo{1}\fi
+        \ifdefined\hust@is@laytwo
         %% Horizontal 2: 2 lines VN, 2 lines EN (Hình 7b, matches logo-full.png)
         \begingroup
           \let\\\newline
@@ -1130,6 +1230,7 @@
           }%
         }%
         \raise\dimexpr 0.5\hust@lh@dim - 0.5\ht\hust@tmpbox + 0.5\dp\hust@tmpbox\relax\hbox{\usebox\hust@tmpbox}%
+      \fi
       \fi
     \else
       %% ================================= Case 3 & 4: Member Unit (Hình 9)

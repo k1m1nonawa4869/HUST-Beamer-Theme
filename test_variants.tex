@@ -29,8 +29,8 @@
   lang=en,
   dateaddress=on,
   address={Hanoi},
-  logolayout=1,
-  unit={SCHOOL OF INFORMATION AND COMMUNICATION TECHNOLOGY},
+  logolayout=4b,
+  unit={SCHOOL OF INFORMATION AND\newline COMMUNICATION TECHNOLOGY},
   headerright=pagenumber,
   framebg=on,
   footermeta=on
@@ -46,7 +46,7 @@
 
 \title[HUST Brand-Compliant Beamer Presentation Theme]{{\normalsize Undergraduate Research Thesis}\\[5pt] {\bfseries HUST Brand-Compliant Beamer Presentation Theme}}
 \subtitle{Modern LaTeX presentation system with flexible aspect ratios and font families}
-\author[Nguyen Van A]{Nguyen Van A - 20231234 \\ Advisor: Assoc. Prof. Le Van Thu C}
+\author[Nguyễn Văn A]{Nguyễn Văn A - 20231234 \\ Advisor: Assoc. Prof. Lê Văn Thu C}
 \institute{School of Information and Communication Technology,\\Hanoi University of Science and Technology}
 \date{\hustdate{8}{7}{2025}}
 
@@ -74,33 +74,33 @@
 %% ------------------------------------------------------------- Section 1
 \section[Brand]{Introduction \& Brand Identity}
 \subsection{Brand Identity System}
-\begin{frame}[t]{Dynamic Logo Lockups per Brand Guidebook}{Standard Fig. 7 (Bilingual) and Fig. 9 (Member Units) Specifications}
+\begin{frame}[t]{Dynamic Logo Lockups per Brand Guidebook}{Standard Fig. 7 (Bilingual), Fig. 8b (English), and Fig. 10 (English Member Units)}
   \scriptsize
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
       \textbf{1. Official Bilingual Lockup (Fig. 7):}
       \vskip0.3em
-      \hustlogo[height=0.85cm]
+      \hustlogo[height=0.85cm, lang=bilingual]
       \vskip0.7em
       \textbf{2. Two-Line Bilingual Variant (Fig. 7b):}
       \vskip0.3em
-      \hustlogo[height=0.85cm, layout=2, vn={ĐẠI HỌC\newline BÁCH KHOA HÀ NỘI}, en={HANOI UNIVERSITY\newline OF SCIENCE AND TECHNOLOGY}]
+      \hustlogo[height=0.85cm, lang=bilingual, layout=2]
       \vskip0.7em
-      \textbf{3. Single-Line Member Unit (Fig. 9):}
+      \textbf{3. English-Only Official Lockup (Fig. 8b):}
       \vskip0.3em
-      \hustlogo[height=0.85cm, unit={TRƯỜNG CƠ KHÍ}]
+      \hustlogo[height=0.85cm]
     \end{column}
 
     \begin{column}{0.48\textwidth}
-      \textbf{4a. Symmetrical 2-Line Unit -- 2-Line HUST:}
+      \textbf{4. Single-Line English Member Unit (Fig. 10):}
       \vskip0.3em
-      \hustlogo[height=0.85cm, layout=4a, unit={VIỆN CÔNG NGHỆ ĐIỀU KHIỂN\newline VÀ TỰ ĐỘNG HÓA}]
+      \hustlogo[height=0.85cm, unit={GRADUATE SCHOOL}]
       \vskip0.7em
-      \textbf{4b. Centered 2-Line Unit -- 1-Line HUST:}
+      \textbf{5. Two-Line English Member Unit (Fig. 10):}
       \vskip0.3em
-      \hustlogo[height=0.85cm, layout=4b, unit={VIỆN CÔNG NGHỆ ĐIỀU KHIỂN\newline VÀ TỰ ĐỘNG HÓA}]
+      \hustlogo[height=0.85cm, layout=4b, unit={INSTITUTE FOR CONTROL ENGINEERING\newline AND AUTOMATION}]
       \vskip0.7em
-      \textbf{5. Faculty of Math \& Informatics (FaMI, Fig. 3):}
+      \textbf{6. Faculty of Math \& Informatics (FaMI, Fig. 3):}
       \vskip0.3em
       \hustlogo[image=fami-shield.png, height=0.85cm, vn={KHOA TOÁN - TIN}, en={Faculty of Mathematics and Informatics}, color=famiblue, equalwidth=false]
     \end{column}
