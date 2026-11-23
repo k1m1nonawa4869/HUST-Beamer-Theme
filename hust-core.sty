@@ -79,20 +79,13 @@
   \fi
 }
 \newcommand{\hust@use@cachedopacityimg}[4]{%
-  \ifdefined\saveboxresource
-    \ifcsname hust@xobj@#1\endcsname\else
-      \setbox\hust@xtmp=\hbox{\tikz[baseline=(husti.south)]\node[inner sep=0pt,outer sep=0pt,opacity=#2](husti){\includegraphics[#3]{#4}};}%
-      \saveboxresource\hust@xtmp\relax
-      \expandafter\xdef\csname hust@xobj@#1\endcsname{\the\lastsavedboxresourceindex}%
-    \fi
-    \useboxresource\csname hust@xobj@#1\endcsname\relax
-  \else
-    \ifcsname hust@imgbox@#1\endcsname\else
-      \expandafter\newsavebox\csname hust@imgbox@#1\endcsname
-      \global\expandafter\setbox\csname hust@imgbox@#1\endcsname=\hbox{\tikz[baseline=(husti.south)]\node[inner sep=0pt,outer sep=0pt,opacity=#2](husti){\includegraphics[#3]{#4}};}%
-    \fi
-    \expandafter\copy\csname hust@imgbox@#1\endcsname
-  \fi
+  \begingroup
+    \pgfsys@beginscope
+    \pgfsetfillopacity{#2}%
+    \pgfsetstrokeopacity{#2}%
+    \hust@use@cachedimg{#1}{#3}{#4}%
+    \pgfsys@endscope
+  \endgroup
 }
 
 %% Prevent hyperref PDF-string Unicode warnings on \\, \newline, \hustdate in \title/\author/\date
