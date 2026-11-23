@@ -13,6 +13,7 @@
 \renewcommand{\tabularxcolumn}[1]{m{#1}}
 \RequirePackage{caption}
 \captionsetup{font=scriptsize, labelfont={bf, color=hustmain}, labelsep=colon}
+\RequirePackage{xspace}
 
 %% TikZ libraries for graphics & markers:
 \usetikzlibrary{calc, decorations.markings, arrows.meta}
@@ -56,9 +57,11 @@
 
 %% ------------------------------------------------------------- 3. Mathematics & Operators
 \RequirePackage{amsmath, mathtools}
-\RequirePackage{derivative}
-\RequirePackage{nicematrix, nicefrac}
-\RequirePackage{siunitx}
+\ifdefined\hustnomathextra\else
+  \RequirePackage{derivative}
+  \RequirePackage{nicematrix, nicefrac}
+  \RequirePackage{siunitx}
+\fi
 
 %% Bold math compatibility:
 \ifdefined\symbfit
@@ -219,60 +222,90 @@
 \makeatother
 
 %% ------------------------------------------------------------- 5. Code & Pseudocode
-\RequirePackage{listings}
-\RequirePackage[linesnumbered,ruled,vlined]{algorithm2e}
-\RequirePackage[highlightmode=immediate]{minted}
+\ifdefined\hustnocode\else
+  \RequirePackage{listings}
+  \RequirePackage[linesnumbered,ruled,vlined]{algorithm2e}
 
-%% Keep algorithm2e line numbers and Input/Output strictly aligned inside the ruled block:
-\SetNlSkip{0.5em}
-\AtBeginEnvironment{algorithm}{%
-  \IncMargin{1.2em}%
-  \SetKwInput{KwIn}{\kern-1.2em Input}%
-  \SetKwInput{KwOut}{\kern-1.2em Output}%
-}
+  %% Keep algorithm2e line numbers and Input/Output strictly aligned inside the ruled block:
+  \SetNlSkip{0.5em}
+  \AtBeginEnvironment{algorithm}{%
+    \IncMargin{1.2em}%
+    \SetKwInput{KwIn}{\kern-1.2em Input}%
+    \SetKwInput{KwOut}{\kern-1.2em Output}%
+  }
 
+  \makeatletter
+  \AtBeginDocument{%
+    \renewcommand{\fnum@lstlisting}{Listing~\thelstlisting}%
+  }
+  \makeatother
+
+  \colorlet{hustcodebg}{hustmain!5!white}
+  \lstdefinestyle{hustcode}{
+    backgroundcolor=\color{hustcodebg},
+    basicstyle=\ttfamily\scriptsize,
+    keywordstyle=\bfseries\color{hustmain},
+    stringstyle=\color{HUSTOrange},
+    commentstyle=\itshape\color{HUSTGray},
+    numberstyle=\tiny\color{HUSTGray},
+    numbers=left,
+    numbersep=5pt,
+    framesep=3pt,
+    xleftmargin=1.5em,
+    framexleftmargin=\dimexpr 1.5em - 3.5pt\relax,
+    xrightmargin=3.5pt,
+    framexrightmargin=0pt,
+    frame=single,
+    framerule=0.5pt,
+    rulecolor=\color{hustmain!30},
+    breaklines=true,
+    tabsize=2,
+    showstringspaces=false
+  }
+\fi
+
+%% Opt-in minted support:
+%%   Default (unset or off): minted is NOT loaded (no Python / -shell-escape required).
+%%   \def\hustmintedmode{auto}   (or \def\hustuseminted{}): loads minted normally (caches in _minted/).
+%%   \def\hustmintedmode{frozen}: loads minted with [frozencache] (zero Python spawns, no -shell-escape!).
 \makeatletter
-\AtBeginDocument{%
-  \renewcommand{\fnum@lstlisting}{Listing~\thelstlisting}%
-}
+\ifdefined\hustmintedmode\else
+  \ifdefined\hustuseminted
+    \def\hustmintedmode{auto}%
+  \else
+    \def\hustmintedmode{off}%
+  \fi
+\fi
+\def\hust@m@auto{auto}
+\def\hust@m@frozen{frozen}
+\def\hust@m@on{on}
+\ifx\hustmintedmode\hust@m@frozen
+  \RequirePackage[frozencache]{minted}
+  \def\hust@minted@loaded{1}
+\else\ifx\hustmintedmode\hust@m@auto
+  \RequirePackage{minted}
+  \def\hust@minted@loaded{1}
+\else\ifx\hustmintedmode\hust@m@on
+  \RequirePackage{minted}
+  \def\hust@minted@loaded{1}
+\fi\fi\fi
 \makeatother
 
-\colorlet{hustcodebg}{hustmain!5!white}
-\lstdefinestyle{hustcode}{
-  backgroundcolor=\color{hustcodebg},
-  basicstyle=\ttfamily\scriptsize,
-  keywordstyle=\bfseries\color{hustmain},
-  stringstyle=\color{HUSTOrange},
-  commentstyle=\itshape\color{HUSTGray},
-  numberstyle=\tiny\color{HUSTGray},
-  numbers=left,
-  numbersep=5pt,
-  framesep=3pt,
-  xleftmargin=1.5em,
-  framexleftmargin=\dimexpr 1.5em - 3.5pt\relax,
-  xrightmargin=3.5pt,
-  framexrightmargin=0pt,
-  frame=single,
-  framerule=0.5pt,
-  rulecolor=\color{hustmain!30},
-  breaklines=true,
-  tabsize=2,
-  showstringspaces=false
-}
-
-%% Configure minted to match theme colors and keep line numbers inside the frame box:
-\setminted{
-  fontsize=\scriptsize,
-  linenos=true,
-  numbersep=5pt,
-  xleftmargin=1.2em,
-  breaklines=true,
-  tabsize=2,
-  frame=lines,
-  framerule=0.5pt,
-  rulecolor=\color{hustmain!40}
-}
-\renewcommand{\theFancyVerbLine}{\textcolor{HUSTGray}{\tiny\arabic{FancyVerbLine}}}
+\ifdefined\hust@minted@loaded
+  %% Configure minted to match theme colors and keep line numbers inside the frame box:
+  \setminted{
+    fontsize=\scriptsize,
+    linenos=true,
+    numbersep=5pt,
+    xleftmargin=1.2em,
+    breaklines=true,
+    tabsize=2,
+    frame=lines,
+    framerule=0.5pt,
+    rulecolor=\color{hustmain!40}
+  }
+  \renewcommand{\theFancyVerbLine}{\textcolor{HUSTGray}{\tiny\arabic{FancyVerbLine}}}
+\fi
 
 %% ------------------------------------------------------------- 5. Beamer Theorems & Academic Blocks
 %% Enable numbering for Beamer theorem and definition environments:

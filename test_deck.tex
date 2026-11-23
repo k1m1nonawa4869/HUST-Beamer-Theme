@@ -39,6 +39,8 @@
 ]{HUST}
 
 %% ------------------------------------------------------------- Modular Academic & UX Setup
+%% Enable minted (uses frozen cache automatically once _minted/ exists -> ~4s faster builds)
+\IfFileExists{_minted/default.style.minted}{\def\hustmintedmode{frozen}}{\def\hustmintedmode{auto}}
 \input{hust-setup}
 
 \usepackage[backend=biber,style=numeric,sorting=none,maxcitenames=2,mincitenames=1]{biblatex}
