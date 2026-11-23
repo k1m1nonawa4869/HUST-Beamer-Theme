@@ -349,14 +349,20 @@
   .unknown/.code={},
 }
 
+\newcommand{\hust@maybe@section}[1]{%
+  \if\relax\detokenize{#1}\relax\else
+    \section{#1}%
+  \fi
+}
+
 \newcommand{\hustsection}[1][panel=true]{%
   \pgfkeys{/hustsection/.cd, #1}%
-  \@ifnextchar\bgroup{\@gobble}{}%
+  \@ifnextchar\bgroup{\hust@maybe@section}{}%
 }
 
 \newcommand{\hustpanel}[1][true]{%
   \pgfkeys{/hustsection/.cd, panel=#1}%
-  \@ifnextchar\bgroup{\@gobble}{}%
+  \@ifnextchar\bgroup{\hust@maybe@section}{}%
 }
 
 %% Hook \section to support \hustsection[alias=...] seamlessly when \section{...} has no []

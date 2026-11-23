@@ -285,36 +285,103 @@
 \newcount\hust@tlow
 \newcount\hust@thigh
 \newcount\hust@tmid
-\def\hust@tbest{...}
+\newcount\hust@tbestk
 
 \directlua{
-  hust_t_str = ""
+  hust_t_toks = {}
+  hust_t_ntoks = 0
+  local bs = string.char(92)
+  local lb = string.char(123)
+  local rb = string.char(125)
+  local dl = string.char(36)
+  local function hust_utf8_clen(s, pos)
+    local b = string.byte(s, pos)
+    if not b then return 0 end
+    if b < 128 then return 1
+    elseif b < 224 then return 2
+    elseif b < 240 then return 3
+    else return 4 end
+  end
   function hust_t_set(s)
-    hust_t_str = s
-    return unicode.utf8.len(s)
+    hust_t_toks = {}
+    hust_t_ntoks = 0
+    s = string.gsub(s, bs .. "protect[ ]+", "")
+    local pos = 1
+    local n = string.len(s)
+    while pos <= n do
+      if string.byte(s, pos) == 92 then
+        local cw = string.match(s, "^" .. bs .. "[A-Za-z]+[ ]*", pos)
+        if cw then
+          hust_t_ntoks = hust_t_ntoks + 1
+          hust_t_toks[hust_t_ntoks] = cw
+          pos = pos + string.len(cw)
+        else
+          local cl = hust_utf8_clen(s, pos + 1)
+          local tok = string.sub(s, pos, pos + cl)
+          hust_t_ntoks = hust_t_ntoks + 1
+          hust_t_toks[hust_t_ntoks] = tok
+          pos = pos + cl + 1
+        end
+      else
+        local cl = hust_utf8_clen(s, pos)
+        if cl < 1 then cl = 1 end
+        hust_t_ntoks = hust_t_ntoks + 1
+        hust_t_toks[hust_t_ntoks] = string.sub(s, pos, pos + cl - 1)
+        pos = pos + cl
+      end
+    end
+    return hust_t_ntoks
   end
   function hust_t_sub(k)
-    local sub = unicode.utf8.sub(hust_t_str, 1, k)
-    while string.sub(sub, -1) == " " do
-      sub = string.sub(sub, 1, -2)
+    local sub = table.concat(hust_t_toks, "", 1, k)
+    while true do
+      local prev = sub
+      sub = string.gsub(sub, "[ ]+$", "")
+      sub = string.gsub(sub, bs .. "[A-Za-z]+[ ]*" .. lb .. "$", "")
+      if string.sub(sub, -1) == lb and not (string.sub(sub, -2) == (bs .. lb)) then
+        sub = string.sub(sub, 1, -2)
+      end
+      if not string.match(sub, bs .. "TeX[ ]*$") and not string.match(sub, bs .. "LaTeX[ ]*$") then
+        sub = string.gsub(sub, bs .. "[A-Za-z]+$", "")
+      end
+      if string.sub(sub, -1) == bs and not (string.sub(sub, -2) == (bs .. bs)) then
+        sub = string.sub(sub, 1, -2)
+      end
+      if sub == prev then break end
     end
-    local bs = string.match(sub, "\\+$")
-    if bs and math.fmod(string.len(bs), 2) == 1 then
-      sub = string.sub(sub, 1, -2)
+    local stack = {}
+    local sn = 0
+    local i = 1
+    local n = string.len(sub)
+    while i <= n do
+      local b = string.byte(sub, i)
+      if b == 92 then
+        i = i + 2
+      else
+        local c = string.sub(sub, i, i)
+        if c == dl then
+          if sn > 0 and stack[sn] == dl then
+            stack[sn] = nil
+            sn = sn - 1
+          else
+            sn = sn + 1
+            stack[sn] = dl
+          end
+        elseif c == lb then
+          sn = sn + 1
+          stack[sn] = rb
+        elseif c == rb then
+          if sn > 0 and stack[sn] == rb then
+            stack[sn] = nil
+            sn = sn - 1
+          end
+        end
+        i = i + 1
+      end
     end
-    local dl = string.char(36)
-    local lb = string.char(123)
-    local rb = string.char(125)
-    local open_b = 0
-    local open_m = false
-    for i = 1, string.len(sub) do
-      local c = string.sub(sub, i, i)
-      if c == dl then open_m = not open_m
-      elseif c == lb then open_b = open_b + 1
-      elseif c == rb and open_b > 0 then open_b = open_b - 1 end
+    for j = sn, 1, -1 do
+      sub = sub .. stack[j]
     end
-    if open_m then sub = sub .. dl end
-    if open_b > 0 then sub = sub .. string.rep(rb, open_b) end
     tex.sprint(sub .. "...")
   end
 }
@@ -326,11 +393,15 @@
     \setbox\hust@tbox=\hbox{\hust@t@str}%
     \ifdim\wd\hust@tbox>#1\relax
       \hust@tmax=#1\relax
-      \hust@thigh=\directlua{tex.sprint(hust_t_set("\luaescapestring{\hust@t@str}"))}\relax
+      \hust@thigh=\directlua{tex.sprint(hust_t_set("\luaescapestring{\unexpanded\expandafter{\hust@t@str}}"))}\relax
       \hust@tlow=1\relax
-      \def\hust@tbest{...}%
+      \global\hust@tbestk=0\relax
       \hust@tloop{#2}%
-      \hust@tbest
+      \ifnum\hust@tbestk>0\relax
+        \directlua{hust_t_sub(\the\hust@tbestk)}%
+      \else
+        ...%
+      \fi
     \else
       \hust@t@str
     \fi
@@ -346,15 +417,10 @@
       \ifdim\wd\hust@tbox>\hust@tmax\relax
         \global\hust@thigh=\numexpr\hust@tmid - 1\relax
       \else
-        \global\let\hust@tmpbest\relax
-        \xdef\hust@tmpbest{\directlua{hust_t_sub(\the\hust@tmid)}}%
+        \global\hust@tbestk=\hust@tmid\relax
         \global\hust@tlow=\numexpr\hust@tmid + 1\relax
       \fi
     \endgroup
-    \ifx\hust@tmpbest\relax\else
-      \let\hust@tbest\hust@tmpbest
-      \global\let\hust@tmpbest\relax
-    \fi
     \hust@tloop{#1}%
   \fi
 }
