@@ -69,32 +69,37 @@
 \newcount\hust@sec@total
 \newcount\hust@sub@total
 
+\newsavebox\hust@prog@cachebox
+\newsavebox\hust@prog@lblbox
+\def\hust@prog@cachekey{}
+
 \newcommand{\hust@draw@subbars@active}{%
   \ifnum\hust@sub@idx>\hust@sub@total\else
-    \setlength{\hust@bar@xl}{\dimexpr\hust@sec@xl + \hust@bar@pad + \hust@bar@step * \numexpr\hust@sub@idx - 1\relax\relax}%
-    \setlength{\hust@bar@xr}{\dimexpr\hust@bar@xl + \hust@bar@w\relax}%
+    \setlength{\hust@bar@xl}{\dimexpr\hust@bar@pad + \hust@bar@step * \numexpr\hust@sub@idx - 1\relax\relax}%
     \ifcsname hust@nav@subpage@\the\hust@sec@idx @\the\hust@sub@idx\endcsname
       \expandafter\let\expandafter\hust@cur@subpage\csname hust@nav@subpage@\the\hust@sec@idx @\the\hust@sub@idx\endcsname
     \else
       \def\hust@cur@subpage{}%
     \fi
-    \ifnum\hust@sub@idx=\c@subsection\relax
-      \fill[hustyellow] ([xshift=\hust@bar@xl, yshift=\hust@bar@ybot] current page.north west) rectangle
-        ([xshift=\hust@bar@xr, yshift=\hust@bar@ytop] current page.north west);
-    \else
-      \ifx\hust@colname\hust@col@red
-        \fill[hustlightred] ([xshift=\hust@bar@xl, yshift=\hust@bar@ybot] current page.north west) rectangle
-          ([xshift=\hust@bar@xr, yshift=\hust@bar@ytop] current page.north west);
-      \else
-        \fill[hustlightblue] ([xshift=\hust@bar@xl, yshift=\hust@bar@ybot] current page.north west) rectangle
-          ([xshift=\hust@bar@xr, yshift=\hust@bar@ytop] current page.north west);
-      \fi
-    \fi
+    \rlap{%
+      \kern\hust@bar@xl
+      \raise 2pt\hbox{%
+        \ifnum\hust@sub@idx=\c@subsection\relax
+          \textcolor{hustyellow}{\vrule width \hust@bar@w height 1.5pt depth 0pt}%
+        \else
+          \ifx\hust@colname\hust@col@red
+            \textcolor{hustlightred}{\vrule width \hust@bar@w height 1.5pt depth 0pt}%
+          \else
+            \textcolor{hustlightblue}{\vrule width \hust@bar@w height 1.5pt depth 0pt}%
+          \fi
+        \fi
+      }%
+    }%
     \ifx\hust@cur@subpage\@empty\else
-      \node[anchor=south west, inner sep=0pt, outer sep=0pt]
-        at ([xshift=\hust@bar@xl, yshift=\hust@bar@ybot] current page.north west) {%
-          \hyperlink{Navigation\hust@cur@subpage}{\phantom{\rule{\hust@bar@w}{\dimexpr\hust@bar@ytop - \hust@bar@ybot + 2.5pt\relax}}}%
-        };
+      \rlap{%
+        \kern\hust@bar@xl
+        \raise 2pt\hbox{\hyperlink{Navigation\hust@cur@subpage}{\phantom{\rule{\hust@bar@w}{4pt}}}}%
+      }%
     \fi
     \advance\hust@sub@idx by 1\relax
     \expandafter\hust@draw@subbars@active
@@ -103,20 +108,21 @@
 
 \newcommand{\hust@draw@subbars@inactive}{%
   \ifnum\hust@sub@idx>\hust@sub@total\else
-    \setlength{\hust@bar@xl}{\dimexpr\hust@sec@xl + \hust@bar@pad + \hust@bar@step * \numexpr\hust@sub@idx - 1\relax\relax}%
-    \setlength{\hust@bar@xr}{\dimexpr\hust@bar@xl + \hust@bar@w\relax}%
+    \setlength{\hust@bar@xl}{\dimexpr\hust@bar@pad + \hust@bar@step * \numexpr\hust@sub@idx - 1\relax\relax}%
     \ifcsname hust@nav@subpage@\the\hust@sec@idx @\the\hust@sub@idx\endcsname
       \expandafter\let\expandafter\hust@cur@subpage\csname hust@nav@subpage@\the\hust@sec@idx @\the\hust@sub@idx\endcsname
     \else
       \def\hust@cur@subpage{}%
     \fi
-    \fill[hustgray] ([xshift=\hust@bar@xl, yshift=\hust@bar@ybot] current page.north west) rectangle
-      ([xshift=\hust@bar@xr, yshift=\hust@bar@ytop] current page.north west);
+    \rlap{%
+      \kern\hust@bar@xl
+      \raise 2pt\hbox{\textcolor{hustgray}{\vrule width \hust@bar@w height 1.5pt depth 0pt}}%
+    }%
     \ifx\hust@cur@subpage\@empty\else
-      \node[anchor=south west, inner sep=0pt, outer sep=0pt]
-        at ([xshift=\hust@bar@xl, yshift=\hust@bar@ybot] current page.north west) {%
-          \hyperlink{Navigation\hust@cur@subpage}{\phantom{\rule{\hust@bar@w}{\dimexpr\hust@bar@ytop - \hust@bar@ybot + 2.5pt\relax}}}%
-        };
+      \rlap{%
+        \kern\hust@bar@xl
+        \raise 2pt\hbox{\hyperlink{Navigation\hust@cur@subpage}{\phantom{\rule{\hust@bar@w}{4pt}}}}%
+      }%
     \fi
     \advance\hust@sub@idx by 1\relax
     \expandafter\hust@draw@subbars@inactive
@@ -127,9 +133,6 @@
 
 \newcommand{\hust@render@secloop}{%
   \ifnum\hust@sec@idx>\hust@sec@total\else
-    \setlength{\hust@sec@xl}{\dimexpr\hust@sec@w * \numexpr\hust@sec@idx - 1\relax\relax}%
-    \setlength{\hust@sec@xr}{\dimexpr\hust@sec@w * \hust@sec@idx\relax}%
-    \setlength{\hust@sec@xm}{\dimexpr\hust@sec@xl + \hust@sec@w / 2\relax}%
     \ifcsname hust@nav@secshort@\the\hust@sec@idx\endcsname
       \expandafter\let\expandafter\hust@cur@stitle\csname hust@nav@secshort@\the\hust@sec@idx\endcsname
     \else
@@ -146,48 +149,23 @@
       \hust@sub@total=0\relax
     \fi
     \ifnum\hust@sec@idx=\c@section\relax
-      \fill[hustmain] ([xshift=\hust@sec@xl] current page.north west) rectangle
-        ([xshift=\hust@sec@xr, yshift=-\hust@prog@h] current page.north west);
-      \ifx\hust@cur@spage\@empty\else
-        \node[anchor=north west, inner sep=0pt, outer sep=0pt]
-          at ([xshift=\hust@sec@xl] current page.north west) {%
-            \hyperlink{Navigation\hust@cur@spage}{\phantom{\rule{\hust@sec@w}{\hust@prog@h}}}%
-          };
-      \fi
-      \node[anchor=center, inner sep=0pt, outer sep=0pt, align=center, text width=\dimexpr\hust@sec@w - 4pt\relax]
-        at ([xshift=\hust@sec@xm, yshift=\hust@prog@texty] current page.north west) {%
-          \ifx\hust@cur@spage\@empty
-            {\fontsize{6pt}{6.8pt}\linespread{0.82}\selectfont\bfseries\color{white}\husttruncateto{\dimexpr\hust@sec@w - 4.5pt\relax}{\fontsize{6pt}{6.8pt}\selectfont\bfseries}{\hust@cur@stitle}}%
-          \else
-            \hyperlink{Navigation\hust@cur@spage}{{\fontsize{6pt}{6.8pt}\linespread{0.82}\selectfont\bfseries\color{white}\husttruncateto{\dimexpr\hust@sec@w - 4.5pt\relax}{\fontsize{6pt}{6.8pt}\selectfont\bfseries}{\hust@cur@stitle}}}%
-          \fi
-        };
-      \ifnum\hust@sub@total>0\relax
-        \setlength{\hust@bar@pad}{4pt}%
-        \setlength{\hust@bar@gap}{2.2pt}%
-        \setlength{\hust@bar@avail}{\dimexpr\hust@sec@w - 2\hust@bar@pad - \hust@bar@gap * \numexpr\hust@sub@total - 1\relax\relax}%
-        \setlength{\hust@bar@w}{\dimexpr\hust@bar@avail / \hust@sub@total\relax}%
-        \setlength{\hust@bar@step}{\dimexpr\hust@bar@w + \hust@bar@gap\relax}%
-        \hust@sub@idx=1\relax
-        \hust@draw@subbars@active
-      \fi
+      \def\hust@p@bgcol{hustmain}%
+      \def\hust@p@fgcol{white}%
     \else
-      \fill[white] ([xshift=\hust@sec@xl] current page.north west) rectangle
-        ([xshift=\hust@sec@xr, yshift=-\hust@prog@h] current page.north west);
+      \def\hust@p@bgcol{white}%
+      \def\hust@p@fgcol{hustblack}%
+    \fi
+    \setbox\hust@prog@lblbox=\hbox{%
+      \fontsize{6pt}{6.8pt}\selectfont\bfseries
+      \color{\hust@p@fgcol}%
+      \husttruncateto{\dimexpr\hust@sec@w - 4.5pt\relax}{\fontsize{6pt}{6.8pt}\selectfont\bfseries}{\hust@cur@stitle}%
+    }%
+    \hbox to \hust@sec@w{%
+      \rlap{\textcolor{\hust@p@bgcol}{\vrule width \hust@sec@w height \hust@prog@h depth 0pt}}%
+      \rlap{\raise\dimexpr \hust@prog@h * 6 / 10 - 0.5\ht\hust@prog@lblbox + 0.5\dp\hust@prog@lblbox\relax\hbox to \hust@sec@w{\hfil\box\hust@prog@lblbox\hfil}}%
       \ifx\hust@cur@spage\@empty\else
-        \node[anchor=north west, inner sep=0pt, outer sep=0pt]
-          at ([xshift=\hust@sec@xl] current page.north west) {%
-            \hyperlink{Navigation\hust@cur@spage}{\phantom{\rule{\hust@sec@w}{\hust@prog@h}}}%
-          };
+        \rlap{\hyperlink{Navigation\hust@cur@spage}{\phantom{\rule{\hust@sec@w}{\hust@prog@h}}}}%
       \fi
-      \node[anchor=center, inner sep=0pt, outer sep=0pt, align=center, text width=\dimexpr\hust@sec@w - 4pt\relax]
-        at ([xshift=\hust@sec@xm, yshift=\hust@prog@texty] current page.north west) {%
-          \ifx\hust@cur@spage\@empty
-            {\fontsize{6pt}{6.8pt}\linespread{0.82}\selectfont\bfseries\color{hustblack}\husttruncateto{\dimexpr\hust@sec@w - 4.5pt\relax}{\fontsize{6pt}{6.8pt}\selectfont\bfseries}{\hust@cur@stitle}}%
-          \else
-            \hyperlink{Navigation\hust@cur@spage}{{\fontsize{6pt}{6.8pt}\linespread{0.82}\selectfont\bfseries\color{hustblack}\husttruncateto{\dimexpr\hust@sec@w - 4.5pt\relax}{\fontsize{6pt}{6.8pt}\selectfont\bfseries}{\hust@cur@stitle}}}%
-          \fi
-        };
       \ifnum\hust@sub@total>0\relax
         \setlength{\hust@bar@pad}{4pt}%
         \setlength{\hust@bar@gap}{2.2pt}%
@@ -195,12 +173,15 @@
         \setlength{\hust@bar@w}{\dimexpr\hust@bar@avail / \hust@sub@total\relax}%
         \setlength{\hust@bar@step}{\dimexpr\hust@bar@w + \hust@bar@gap\relax}%
         \hust@sub@idx=1\relax
-        \hust@draw@subbars@inactive
+        \ifnum\hust@sec@idx=\c@section\relax
+          \hust@draw@subbars@active
+        \else
+          \hust@draw@subbars@inactive
+        \fi
       \fi
-    \fi
-    \draw[hustgrayline!40, line width=0.4pt]
-      ([xshift=\hust@sec@xr] current page.north west) --
-      ([xshift=\hust@sec@xr, yshift=-\hust@prog@h] current page.north west);
+      \rlap{\kern\dimexpr\hust@sec@w - 0.4pt\relax\textcolor{hustgrayline!40}{\vrule width 0.4pt height \hust@prog@h depth 0pt}}%
+      \hfil
+    }%
     \advance\hust@sec@idx by 1\relax
     \expandafter\hust@render@secloop
   \fi
@@ -212,12 +193,17 @@
   \fi
   \hust@sec@total=\hust@nav@totalsecs\relax
   \ifnum\hust@sec@total>0\relax
-    \setlength{\hust@sec@w}{\dimexpr\paperwidth / \hust@sec@total\relax}%
-    \setlength{\hust@prog@texty}{\dimexpr-\hust@prog@h * 4 / 10\relax}%
-    \setlength{\hust@bar@ybot}{\dimexpr-\hust@prog@h + 2pt\relax}%
-    \setlength{\hust@bar@ytop}{\dimexpr-\hust@prog@h + 3.5pt\relax}%
-    \hust@sec@idx=1\relax
-    \hust@render@secloop
+    \edef\hust@prog@wantkey{\the\c@section:\the\c@subsection:\the\hust@sec@total:\hust@colname:\the\dimexpr\hust@prog@h\relax}%
+    \ifx\hust@prog@wantkey\hust@prog@cachekey\else
+      \setlength{\hust@sec@w}{\dimexpr\paperwidth / \hust@sec@total\relax}%
+      \global\setbox\hust@prog@cachebox=\hbox to \paperwidth{%
+        \hust@sec@idx=1\relax
+        \hust@render@secloop
+        \hss
+      }%
+      \global\let\hust@prog@cachekey\hust@prog@wantkey
+    \fi
+    \copy\hust@prog@cachebox
   \fi
 }
 
@@ -312,7 +298,7 @@
     \fi
     %% Progress bar at the top (if enabled and current frame allows)
     \ifdim\hust@cur@progh>0pt\relax
-      \hust@render@progressbar
+      \node[anchor=north west, inner sep=0pt, outer sep=0pt] at (current page.north west) {\hust@render@progressbar};
     \fi
     %% Main coloured header band and accent bar (pushed down by \hust@cur@progh)
     \def\hust@bar@thick{thick}%
